@@ -628,7 +628,111 @@ const Dashboard = (function () {
      --------------------------------------------------------------- */
   let medidaSelecionada = null;
   let dicasLigadas = false;
+  let dicasModalLigadas = false;
+  let interacoesLigadas = false;
   let estadoAtual = null;   /* o seletor precisa do estado mais recente, não do da 1ª carga */
+  let focoAntesDoModal = null;
+
+  function fecharGraficoAmpliado() {
+    const modal = document.getElementById('modalGrafico');
+    modal.hidden = true;
+    modal.style.display = 'none';
+    document.getElementById('modalGraficoConteudo').innerHTML = '';
+    if (focoAntesDoModal) focoAntesDoModal.focus();
+    focoAntesDoModal = null;
+  }
+
+  function ampliarGrafico(cartao) {
+    const area = cartao.querySelector('.grafico__area');
+    if (!area || !area.querySelector('svg')) return;
+
+    focoAntesDoModal = document.activeElement;
+    document.getElementById('modalGraficoTitulo').textContent =
+      cartao.querySelector('.grafico__titulo').textContent;
+
+    const conteudo = document.getElementById('modalGraficoConteudo');
+    conteudo.innerHTML = area.innerHTML;
+
+    const modal = document.getElementById('modalGrafico');
+    modal.hidden = false;
+    modal.style.display = 'grid';
+    modal.querySelector('[data-fechar-grafico]').focus();
+
+    if (!dicasModalLigadas) {
+      ligarDicas(conteudo);
+      dicasModalLigadas = true;
+    }
+  }
+
+  function atualizarBotaoApresentacao() {
+    const botao = document.getElementById('btnApresentacao');
+    const ativo = (document.fullscreenElement || document.webkitFullscreenElement) ===
+      document.getElementById('paginaDashboard');
+    botao.querySelector('span').textContent = ativo ? 'Sair da apresentação' : 'Modo Apresentação';
+    botao.setAttribute('aria-pressed', String(ativo));
+  }
+
+  function alternarApresentacao() {
+    const pagina = document.getElementById('paginaDashboard');
+    const ativo = document.fullscreenElement || document.webkitFullscreenElement;
+    let operacao;
+
+    if (ativo) {
+      operacao = document.exitFullscreen
+        ? document.exitFullscreen()
+        : document.webkitExitFullscreen && document.webkitExitFullscreen();
+    } else {
+      operacao = pagina.requestFullscreen
+        ? pagina.requestFullscreen()
+        : pagina.webkitRequestFullscreen && pagina.webkitRequestFullscreen();
+    }
+
+    if (!operacao && !ativo) {
+      console.warn('Este navegador não oferece o modo de tela cheia.');
+      return;
+    }
+    if (operacao && typeof operacao.catch === 'function') {
+      operacao.catch(function (erro) {
+        console.warn('Não foi possível alternar o modo apresentação:', erro);
+      });
+    }
+  }
+
+  function ligarInteracoes() {
+    if (interacoesLigadas) return;
+
+    document.querySelectorAll('#conteudoDashboard .grafico').forEach(function (cartao) {
+      if (!cartao.querySelector('.grafico__area')) return;
+      cartao.classList.add('grafico--ampliavel');
+      cartao.tabIndex = 0;
+      cartao.setAttribute('role', 'button');
+      cartao.setAttribute('aria-label', 'Ampliar gráfico: ' +
+        cartao.querySelector('.grafico__titulo').textContent);
+
+      cartao.addEventListener('click', function (ev) {
+        if (ev.target.closest && ev.target.closest('select, option, label, button')) return;
+        ampliarGrafico(cartao);
+      });
+      cartao.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        ev.preventDefault();
+        ampliarGrafico(cartao);
+      });
+    });
+
+    document.getElementById('btnApresentacao').addEventListener('click', alternarApresentacao);
+    document.querySelectorAll('[data-fechar-grafico]').forEach(function (el) {
+      el.addEventListener('click', fecharGraficoAmpliado);
+    });
+    document.addEventListener('fullscreenchange', atualizarBotaoApresentacao);
+    document.addEventListener('webkitfullscreenchange', atualizarBotaoApresentacao);
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && !document.getElementById('modalGrafico').hidden) {
+        fecharGraficoAmpliado();
+      }
+    });
+    interacoesLigadas = true;
+  }
 
   function renderizar(estado) {
     estadoAtual = estado;
@@ -662,6 +766,7 @@ const Dashboard = (function () {
     document.getElementById('graficoHistograma').innerHTML = graficoHistograma(dados);
     document.getElementById('graficoMoldes').innerHTML = graficoMoldes(estado);
     document.getElementById('tabelaEstatisticas').innerHTML = tabela(dados);
+    ligarInteracoes();
 
     if (!dicasLigadas) {
       ligarDicas(document.getElementById('paginaDashboard'));

@@ -967,6 +967,23 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---------------------------------------------------------------
    INDICADORES
    --------------------------------------------------------------- */
+#paginaDashboard {
+  max-width: 1440px;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.dashboard__acoes {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#conteudoDashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
 .indicadores {
   display: grid;
   grid-template-columns: 1fr;
@@ -974,7 +991,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 .indicador {
-  padding: 16px 18px;
+  padding: 12px 14px;
   background: var(--superficie);
   border: 1px solid var(--borda);
   border-radius: var(--rumo-raio);
@@ -989,8 +1006,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 .indicador__valor {
-  margin: 4px 0 2px;
-  font-size: 1.9rem;
+  margin: 2px 0 1px;
+  font-size: 1.65rem;
   font-weight: 700;
   color: var(--texto-forte);
   line-height: 1.1;
@@ -1011,20 +1028,20 @@ button, input, select, textarea { font: inherit; color: inherit; }
   border-color: var(--rumo-azul);
 }
 .indicador--heroi .indicador__rotulo { color: var(--rumo-cinza); }
-.indicador--heroi .indicador__valor  { color: #fff; font-size: 3rem; }
+.indicador--heroi .indicador__valor  { color: #fff; font-size: 2.35rem; }
 .indicador--heroi .indicador__nota   { color: rgba(255, 255, 255, 0.78); }
 
 /* ---------------------------------------------------------------
    GRÁFICOS
    --------------------------------------------------------------- */
-.grafico { padding: 18px; }
+.grafico { padding: 13px; }
 
 .grafico__topo {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 10px 18px;
-  margin-bottom: 14px;
+  gap: 7px 14px;
+  margin-bottom: 9px;
 }
 
 .grafico__titulo {
@@ -1055,10 +1072,108 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .grafico__area { overflow-x: auto; }
 
+.grafico--ampliavel {
+  cursor: zoom-in;
+  transition: border-color var(--rumo-transicao), box-shadow var(--rumo-transicao),
+              transform var(--rumo-transicao);
+}
+
+.grafico--ampliavel:hover {
+  border-color: var(--rumo-azul-claro);
+  box-shadow: var(--rumo-sombra-hover);
+}
+
+.grafico--ampliavel:focus-visible {
+  outline: none;
+  border-color: var(--rumo-azul-claro);
+  box-shadow: 0 0 0 3px rgba(50, 166, 230, 0.3);
+}
+
+.grafico--ampliavel::after {
+  content: "Clique para ampliar";
+  display: block;
+  margin-top: 5px;
+  text-align: right;
+  font-size: 0.64rem;
+  color: var(--rumo-texto-claro);
+}
+
 .grafico__par {
   display: grid;
   grid-template-columns: 1fr;
   gap: 18px;
+}
+
+/* Dashboard em tela cheia: somente o conteúdo analítico fica visível. */
+#paginaDashboard:fullscreen {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  overflow: auto;
+  padding: 12px 18px 24px;
+  background: var(--bg);
+}
+
+/* Modal dedicado aos gráficos, maior que o modal de edição e sem deformar SVG. */
+.modal-grafico {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.modal-grafico__fundo {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 30, 54, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.modal-grafico__caixa {
+  position: relative;
+  width: min(1400px, 96vw);
+  height: min(900px, 92vh);
+  height: min(900px, 92dvh);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--rumo-raio);
+  background: #fff;
+  box-shadow: 0 18px 60px rgba(0, 30, 54, 0.4);
+  animation: sobe 0.22s ease;
+}
+
+.modal-grafico__topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--rumo-azul);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.modal-grafico__topo > div { flex: 1; min-width: 0; }
+.modal-grafico__kicker { margin: 0; font-size: 0.66rem; color: var(--rumo-cinza); text-transform: uppercase; letter-spacing: 0.08em; }
+.modal-grafico__titulo { font-size: 1rem; color: #fff; }
+.modal-grafico__corpo {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  overflow: auto;
+}
+
+.modal-grafico__corpo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  max-height: calc(92dvh - 82px);
+  object-fit: contain;
 }
 
 /* ---------------------------------------------------------------
@@ -1268,6 +1383,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .grafico__filtro { width: 100%; align-items: flex-start; flex-direction: column; }
   .grafico__filtro .campo__select { width: 100%; }
   .grafico__area, .tabela-rolagem { max-width: 100%; -webkit-overflow-scrolling: touch; }
+  .dashboard__acoes .btn { width: 100%; }
+  .modal-grafico { padding: 6px; }
+  .modal-grafico__caixa { width: 100%; height: 96dvh; border-radius: 12px; }
+  .modal-grafico__corpo { padding: 8px; }
+  .modal-grafico__corpo svg { min-height: 200px; max-height: calc(96dvh - 70px); }
   .tabela { font-size: 0.72rem; }
   .tabela th, .tabela td { padding: 7px 8px; }
 }
@@ -1294,6 +1414,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
   .indicadores { grid-template-columns: repeat(2, 1fr); }
   .grafico__par { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 900px) {
+  #conteudoDashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #conteudoDashboard > .indicadores,
+  #conteudoDashboard > .grafico__par,
+  #conteudoDashboard > .grafico:last-child { grid-column: 1 / -1; }
+  #paginaDashboard .indicadores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (min-width: 1000px) {
@@ -1431,6 +1559,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 <!-- ================= PÁGINA: DASHBOARD ================= -->
 <main class="pagina" id="paginaDashboard" hidden style="display:none">
 
+  <div class="dashboard__acoes">
+    <button class="btn btn--primario" type="button" id="btnApresentacao">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>
+      </svg>
+      <span>Modo Apresentação</span>
+    </button>
+  </div>
+
   <p class="vazio" id="vazioDashboard" hidden>
     Ainda não há medidas registradas. Preencha ao menos uma cavidade na página
     de Registros para o dashboard aparecer.
@@ -1524,6 +1661,25 @@ button, input, select, textarea { font: inherit; color: inherit; }
       <div class="tabela-rolagem">
         <table class="tabela" id="tabelaEstatisticas"></table>
       </div>
+    </section>
+  </div>
+
+  <!-- Gráfico ampliado permanece dentro do Dashboard para funcionar também em tela cheia. -->
+  <div class="modal-grafico" id="modalGrafico" hidden style="display:none">
+    <div class="modal-grafico__fundo" data-fechar-grafico></div>
+    <section class="modal-grafico__caixa" role="dialog" aria-modal="true" aria-labelledby="modalGraficoTitulo">
+      <header class="modal-grafico__topo">
+        <div>
+          <p class="modal-grafico__kicker">Visualização ampliada</p>
+          <h2 class="modal-grafico__titulo" id="modalGraficoTitulo">Gráfico</h2>
+        </div>
+        <button class="btn-icone btn-icone--claro" type="button" data-fechar-grafico aria-label="Fechar gráfico ampliado">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-grafico__corpo" id="modalGraficoConteudo"></div>
     </section>
   </div>
 </main>
@@ -2229,6 +2385,18 @@ const Sincronizacao = (function () {
     let copia;
     try { copia = JSON.parse(JSON.stringify(estado)); }
     catch (e) { return false; }
+
+    /* A base demonstrativa existe apenas para visualizar o Dashboard e nao
+       deve poluir o banco. Se houver coletas reais junto dela, envia somente
+       os moldes reais. */
+    copia.moldes = (copia.moldes || []).filter(function (molde) {
+      return String(molde.id || '').indexOf('exemplo-molde-') !== 0;
+    });
+    if (copia.modoExemplo && !copia.moldes.length) {
+      notificar('sincronizado');
+      return false;
+    }
+    delete copia.modoExemplo;
 
     fila.push({
       id: id('sync-'),
@@ -3345,7 +3513,111 @@ const Dashboard = (function () {
      --------------------------------------------------------------- */
   let medidaSelecionada = null;
   let dicasLigadas = false;
+  let dicasModalLigadas = false;
+  let interacoesLigadas = false;
   let estadoAtual = null;   /* o seletor precisa do estado mais recente, não do da 1ª carga */
+  let focoAntesDoModal = null;
+
+  function fecharGraficoAmpliado() {
+    const modal = document.getElementById('modalGrafico');
+    modal.hidden = true;
+    modal.style.display = 'none';
+    document.getElementById('modalGraficoConteudo').innerHTML = '';
+    if (focoAntesDoModal) focoAntesDoModal.focus();
+    focoAntesDoModal = null;
+  }
+
+  function ampliarGrafico(cartao) {
+    const area = cartao.querySelector('.grafico__area');
+    if (!area || !area.querySelector('svg')) return;
+
+    focoAntesDoModal = document.activeElement;
+    document.getElementById('modalGraficoTitulo').textContent =
+      cartao.querySelector('.grafico__titulo').textContent;
+
+    const conteudo = document.getElementById('modalGraficoConteudo');
+    conteudo.innerHTML = area.innerHTML;
+
+    const modal = document.getElementById('modalGrafico');
+    modal.hidden = false;
+    modal.style.display = 'grid';
+    modal.querySelector('[data-fechar-grafico]').focus();
+
+    if (!dicasModalLigadas) {
+      ligarDicas(conteudo);
+      dicasModalLigadas = true;
+    }
+  }
+
+  function atualizarBotaoApresentacao() {
+    const botao = document.getElementById('btnApresentacao');
+    const ativo = (document.fullscreenElement || document.webkitFullscreenElement) ===
+      document.getElementById('paginaDashboard');
+    botao.querySelector('span').textContent = ativo ? 'Sair da apresentação' : 'Modo Apresentação';
+    botao.setAttribute('aria-pressed', String(ativo));
+  }
+
+  function alternarApresentacao() {
+    const pagina = document.getElementById('paginaDashboard');
+    const ativo = document.fullscreenElement || document.webkitFullscreenElement;
+    let operacao;
+
+    if (ativo) {
+      operacao = document.exitFullscreen
+        ? document.exitFullscreen()
+        : document.webkitExitFullscreen && document.webkitExitFullscreen();
+    } else {
+      operacao = pagina.requestFullscreen
+        ? pagina.requestFullscreen()
+        : pagina.webkitRequestFullscreen && pagina.webkitRequestFullscreen();
+    }
+
+    if (!operacao && !ativo) {
+      console.warn('Este navegador não oferece o modo de tela cheia.');
+      return;
+    }
+    if (operacao && typeof operacao.catch === 'function') {
+      operacao.catch(function (erro) {
+        console.warn('Não foi possível alternar o modo apresentação:', erro);
+      });
+    }
+  }
+
+  function ligarInteracoes() {
+    if (interacoesLigadas) return;
+
+    document.querySelectorAll('#conteudoDashboard .grafico').forEach(function (cartao) {
+      if (!cartao.querySelector('.grafico__area')) return;
+      cartao.classList.add('grafico--ampliavel');
+      cartao.tabIndex = 0;
+      cartao.setAttribute('role', 'button');
+      cartao.setAttribute('aria-label', 'Ampliar gráfico: ' +
+        cartao.querySelector('.grafico__titulo').textContent);
+
+      cartao.addEventListener('click', function (ev) {
+        if (ev.target.closest && ev.target.closest('select, option, label, button')) return;
+        ampliarGrafico(cartao);
+      });
+      cartao.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Enter' && ev.key !== ' ') return;
+        ev.preventDefault();
+        ampliarGrafico(cartao);
+      });
+    });
+
+    document.getElementById('btnApresentacao').addEventListener('click', alternarApresentacao);
+    document.querySelectorAll('[data-fechar-grafico]').forEach(function (el) {
+      el.addEventListener('click', fecharGraficoAmpliado);
+    });
+    document.addEventListener('fullscreenchange', atualizarBotaoApresentacao);
+    document.addEventListener('webkitfullscreenchange', atualizarBotaoApresentacao);
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && !document.getElementById('modalGrafico').hidden) {
+        fecharGraficoAmpliado();
+      }
+    });
+    interacoesLigadas = true;
+  }
 
   function renderizar(estado) {
     estadoAtual = estado;
@@ -3379,6 +3651,7 @@ const Dashboard = (function () {
     document.getElementById('graficoHistograma').innerHTML = graficoHistograma(dados);
     document.getElementById('graficoMoldes').innerHTML = graficoMoldes(estado);
     document.getElementById('tabelaEstatisticas').innerHTML = tabela(dados);
+    ligarInteracoes();
 
     if (!dicasLigadas) {
       ligarDicas(document.getElementById('paginaDashboard'));

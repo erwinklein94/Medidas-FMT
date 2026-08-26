@@ -8,7 +8,7 @@
   <title>Medidas FMT — Inspeção de Ombreiras | Rumo</title>
   <link rel="icon" href="assets/rumo/rumo-logo-azul.png">
   <link rel="stylesheet" href="css/rumo.css?v=5">
-  <link rel="stylesheet" href="css/app.css?v=5">
+  <link rel="stylesheet" href="css/app.css?v=6">
 </head>
 <body>
 
@@ -126,6 +126,15 @@
 <!-- ================= PÁGINA: DASHBOARD ================= -->
 <main class="pagina" id="paginaDashboard" hidden style="display:none">
 
+  <div class="dashboard__acoes">
+    <button class="btn btn--primario" type="button" id="btnApresentacao">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>
+      </svg>
+      <span>Modo Apresentação</span>
+    </button>
+  </div>
+
   <p class="vazio" id="vazioDashboard" hidden>
     Ainda não há medidas registradas. Preencha ao menos uma cavidade na página
     de Registros para o dashboard aparecer.
@@ -221,6 +230,25 @@
       </div>
     </section>
   </div>
+
+  <!-- Gráfico ampliado permanece dentro do Dashboard para funcionar também em tela cheia. -->
+  <div class="modal-grafico" id="modalGrafico" hidden style="display:none">
+    <div class="modal-grafico__fundo" data-fechar-grafico></div>
+    <section class="modal-grafico__caixa" role="dialog" aria-modal="true" aria-labelledby="modalGraficoTitulo">
+      <header class="modal-grafico__topo">
+        <div>
+          <p class="modal-grafico__kicker">Visualização ampliada</p>
+          <h2 class="modal-grafico__titulo" id="modalGraficoTitulo">Gráfico</h2>
+        </div>
+        <button class="btn-icone btn-icone--claro" type="button" data-fechar-grafico aria-label="Fechar gráfico ampliado">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-grafico__corpo" id="modalGraficoConteudo"></div>
+    </section>
+  </div>
 </main>
 
 <footer class="rodape">
@@ -288,9 +316,9 @@
 <script src="js/avaliacao.js?v=5"></script>
 <script src="js/armazenamento.js?v=5"></script>
 <script src="js/dados-exemplo.js?v=1"></script>
-<script src="js/sincronizacao.js?v=6"></script>
+<script src="js/sincronizacao.js?v=7"></script>
 <script src="js/exportar.js?v=5"></script>
-<script src="js/dashboard.js?v=5"></script>
+<script src="js/dashboard.js?v=6"></script>
 <script src="js/app.js?v=5"></script>
 </body>
 </html>

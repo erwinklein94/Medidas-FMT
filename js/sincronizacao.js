@@ -91,6 +91,18 @@ const Sincronizacao = (function () {
     try { copia = JSON.parse(JSON.stringify(estado)); }
     catch (e) { return false; }
 
+    /* A base demonstrativa existe apenas para visualizar o Dashboard e nao
+       deve poluir o banco. Se houver coletas reais junto dela, envia somente
+       os moldes reais. */
+    copia.moldes = (copia.moldes || []).filter(function (molde) {
+      return String(molde.id || '').indexOf('exemplo-molde-') !== 0;
+    });
+    if (copia.modoExemplo && !copia.moldes.length) {
+      notificar('sincronizado');
+      return false;
+    }
+    delete copia.modoExemplo;
+
     fila.push({
       id: id('sync-'),
       dispositivo_id: dispositivoId,

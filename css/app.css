@@ -893,6 +893,23 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---------------------------------------------------------------
    INDICADORES
    --------------------------------------------------------------- */
+#paginaDashboard {
+  max-width: 1440px;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.dashboard__acoes {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#conteudoDashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
 .indicadores {
   display: grid;
   grid-template-columns: 1fr;
@@ -900,7 +917,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 .indicador {
-  padding: 16px 18px;
+  padding: 12px 14px;
   background: var(--superficie);
   border: 1px solid var(--borda);
   border-radius: var(--rumo-raio);
@@ -915,8 +932,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 .indicador__valor {
-  margin: 4px 0 2px;
-  font-size: 1.9rem;
+  margin: 2px 0 1px;
+  font-size: 1.65rem;
   font-weight: 700;
   color: var(--texto-forte);
   line-height: 1.1;
@@ -937,20 +954,20 @@ button, input, select, textarea { font: inherit; color: inherit; }
   border-color: var(--rumo-azul);
 }
 .indicador--heroi .indicador__rotulo { color: var(--rumo-cinza); }
-.indicador--heroi .indicador__valor  { color: #fff; font-size: 3rem; }
+.indicador--heroi .indicador__valor  { color: #fff; font-size: 2.35rem; }
 .indicador--heroi .indicador__nota   { color: rgba(255, 255, 255, 0.78); }
 
 /* ---------------------------------------------------------------
    GRÁFICOS
    --------------------------------------------------------------- */
-.grafico { padding: 18px; }
+.grafico { padding: 13px; }
 
 .grafico__topo {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 10px 18px;
-  margin-bottom: 14px;
+  gap: 7px 14px;
+  margin-bottom: 9px;
 }
 
 .grafico__titulo {
@@ -981,10 +998,108 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .grafico__area { overflow-x: auto; }
 
+.grafico--ampliavel {
+  cursor: zoom-in;
+  transition: border-color var(--rumo-transicao), box-shadow var(--rumo-transicao),
+              transform var(--rumo-transicao);
+}
+
+.grafico--ampliavel:hover {
+  border-color: var(--rumo-azul-claro);
+  box-shadow: var(--rumo-sombra-hover);
+}
+
+.grafico--ampliavel:focus-visible {
+  outline: none;
+  border-color: var(--rumo-azul-claro);
+  box-shadow: 0 0 0 3px rgba(50, 166, 230, 0.3);
+}
+
+.grafico--ampliavel::after {
+  content: "Clique para ampliar";
+  display: block;
+  margin-top: 5px;
+  text-align: right;
+  font-size: 0.64rem;
+  color: var(--rumo-texto-claro);
+}
+
 .grafico__par {
   display: grid;
   grid-template-columns: 1fr;
   gap: 18px;
+}
+
+/* Dashboard em tela cheia: somente o conteúdo analítico fica visível. */
+#paginaDashboard:fullscreen {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  overflow: auto;
+  padding: 12px 18px 24px;
+  background: var(--bg);
+}
+
+/* Modal dedicado aos gráficos, maior que o modal de edição e sem deformar SVG. */
+.modal-grafico {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.modal-grafico__fundo {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 30, 54, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.modal-grafico__caixa {
+  position: relative;
+  width: min(1400px, 96vw);
+  height: min(900px, 92vh);
+  height: min(900px, 92dvh);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--rumo-raio);
+  background: #fff;
+  box-shadow: 0 18px 60px rgba(0, 30, 54, 0.4);
+  animation: sobe 0.22s ease;
+}
+
+.modal-grafico__topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--rumo-azul);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.modal-grafico__topo > div { flex: 1; min-width: 0; }
+.modal-grafico__kicker { margin: 0; font-size: 0.66rem; color: var(--rumo-cinza); text-transform: uppercase; letter-spacing: 0.08em; }
+.modal-grafico__titulo { font-size: 1rem; color: #fff; }
+.modal-grafico__corpo {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  overflow: auto;
+}
+
+.modal-grafico__corpo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  max-height: calc(92dvh - 82px);
+  object-fit: contain;
 }
 
 /* ---------------------------------------------------------------
@@ -1194,6 +1309,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .grafico__filtro { width: 100%; align-items: flex-start; flex-direction: column; }
   .grafico__filtro .campo__select { width: 100%; }
   .grafico__area, .tabela-rolagem { max-width: 100%; -webkit-overflow-scrolling: touch; }
+  .dashboard__acoes .btn { width: 100%; }
+  .modal-grafico { padding: 6px; }
+  .modal-grafico__caixa { width: 100%; height: 96dvh; border-radius: 12px; }
+  .modal-grafico__corpo { padding: 8px; }
+  .modal-grafico__corpo svg { min-height: 200px; max-height: calc(96dvh - 70px); }
   .tabela { font-size: 0.72rem; }
   .tabela th, .tabela td { padding: 7px 8px; }
 }
@@ -1220,6 +1340,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
   .indicadores { grid-template-columns: repeat(2, 1fr); }
   .grafico__par { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 900px) {
+  #conteudoDashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #conteudoDashboard > .indicadores,
+  #conteudoDashboard > .grafico__par,
+  #conteudoDashboard > .grafico:last-child { grid-column: 1 / -1; }
+  #paginaDashboard .indicadores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (min-width: 1000px) {
