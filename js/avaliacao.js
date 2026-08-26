@@ -72,11 +72,13 @@ const Avaliacao = (function () {
   /* Mensagem exibida ao lado do campo. */
   function mensagemCampo(campo, status) {
     const un = campo.unidade ? ' ' + campo.unidade : '';
+    /* Mensagens curtas de propósito: a linha de apoio do modal é única e
+       não pode quebrar em duas, senão o formulário deixa de caber na tela. */
     if (status === 'abaixo') {
-      return 'NOK — abaixo do mínimo de ' + formatar(campo, campo.min) + un;
+      return 'NOK — abaixo do mín. ' + formatar(campo, campo.min) + un;
     }
     if (status === 'acima') {
-      return 'NOK — acima do máximo de ' + formatar(campo, campo.max) + un;
+      return 'NOK — acima do máx. ' + formatar(campo, campo.max) + un;
     }
     if (status === 'ok') return 'OK — dentro da tolerância';
     return '';

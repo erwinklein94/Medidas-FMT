@@ -344,17 +344,22 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .campo__ajuda { font-size: 0.74rem; color: var(--rumo-texto-claro); }
 
-.campo__aviso { font-size: 0.76rem; font-weight: 700; display: none; }
+/* Linha única de apoio: faixa aceitável ou aviso de OK/NOK */
+.campo__estado {
+  font-size: 0.72rem;
+  color: var(--rumo-texto-claro);
+  line-height: 1.3;
+}
 
 /* Estados de tolerância */
 .campo.is-ok .campo__input { border-color: var(--rumo-verde); }
-.campo.is-ok .campo__aviso { display: block; color: var(--rumo-verde); }
+.campo.is-ok .campo__estado { color: var(--rumo-verde); font-weight: 700; }
 
 .campo.is-nok .campo__input {
   border-color: var(--rumo-erro);
   background: #FDF4F4;
 }
-.campo.is-nok .campo__aviso { display: block; color: var(--rumo-erro); }
+.campo.is-nok .campo__estado { color: var(--rumo-erro); font-weight: 700; }
 
 .campo--inline { flex: 1; }
 
@@ -858,6 +863,79 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .conferencia.is-nok .conferencia__motivo { color: #A82F2F; font-weight: 700; }
 
 /* ---------------------------------------------------------------
+   MODAL COMPACTO
+   O modal precisa caber inteiro na tela, sem rolagem: são 12 campos
+   em 4 seções. Tudo aqui é mais estreito e menor que o padrão da
+   página, e os blocos de medição viram 3 colunas no desktop
+   (Mesa | Ombreira | Conferência).
+   --------------------------------------------------------------- */
+.modal__caixa { max-width: 1000px; max-height: 97vh; }
+
+.modal__topo { padding: 7px 14px; }
+.modal__titulo { font-size: 0.95rem; }
+.modal__kicker { font-size: 0.6rem; letter-spacing: 0.08em; }
+.modal__topo .btn-icone { width: 32px; height: 32px; }
+
+.modal__nota { padding: 5px 14px; font-size: 0.69rem; line-height: 1.3; }
+
+.modal__corpo { padding: 9px; }
+
+.modal__rodape { padding: 8px 14px; gap: 8px; }
+.modal__rodape .btn { padding: 7px 14px; font-size: 0.8rem; }
+
+#formCavidade .secao { margin-bottom: 6px; border-radius: var(--rumo-raio-sm); }
+
+#formCavidade .secao__titulo {
+  padding: 3px 11px;
+  font-size: 0.72rem;
+  border-left-width: 3px;
+}
+
+#formCavidade .secao__campos {
+  padding: 8px 11px;
+  gap: 8px 12px;
+}
+
+#formCavidade .campo { gap: 2px; }
+#formCavidade .campo__rotulo { font-size: 0.72rem; gap: 5px; }
+#formCavidade .campo__ref { font-size: 0.64rem; }
+
+#formCavidade .campo__input,
+#formCavidade .campo__select,
+#formCavidade .campo__textarea {
+  padding: 5px 9px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  border-width: 1.5px;
+}
+
+#formCavidade .campo__caixa .campo__input { padding-right: 36px; }
+#formCavidade .campo__unidade { right: 9px; font-size: 0.72rem; }
+
+#formCavidade .campo__textarea {
+  min-height: 44px;
+  height: 44px;
+  resize: vertical;
+}
+
+/* Uma linha só, altura reservada: o layout não pula quando vira NOK. */
+#formCavidade .campo__estado {
+  font-size: 0.66rem;
+  min-height: 1.25em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#formCavidade .conferencia { padding: 5px 9px; gap: 8px; border-width: 1.5px; }
+#formCavidade .conferencia__selo {
+  min-width: 50px;
+  padding: 5px 9px;
+  font-size: 0.85rem;
+}
+#formCavidade .conferencia__motivo { font-size: 0.66rem; line-height: 1.25; }
+
+/* ---------------------------------------------------------------
    AVISO (TOAST)
    --------------------------------------------------------------- */
 .aviso {
@@ -887,6 +965,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .grade-campos { grid-template-columns: repeat(2, 1fr); }
   .secao__campos { grid-template-columns: repeat(2, 1fr); }
   .grade-cavidades { grid-template-columns: repeat(3, 1fr); }
+
+  /* Mesa | Ombreira | Conferência lado a lado — cada bloco vira uma linha */
+  #formCavidade .secao__campos { grid-template-columns: 1fr 1fr 1.15fr; }
   .topo__titulo { font-size: 1.2rem; }
   .topo__logo { height: 30px; }
 
@@ -1210,8 +1291,7 @@ const CONFIG_INSPECAO = {
           opcoes: ['Conforme', 'Conforme com ressalva', 'Não conforme'] },
         { id: 'acao', label: 'Ação recomendada', tipo: 'select',
           opcoes: ['Liberar', 'Ajustar molde', 'Reinspecionar', 'Bloquear'] },
-        { id: 'obsCavidade', label: 'Observações da cavidade', tipo: 'textarea',
-          largura: 'total' }
+        { id: 'obsCavidade', label: 'Observações da cavidade', tipo: 'textarea' }
       ]
     }
   ]
@@ -1306,11 +1386,13 @@ const Avaliacao = (function () {
   /* Mensagem exibida ao lado do campo. */
   function mensagemCampo(campo, status) {
     const un = campo.unidade ? ' ' + campo.unidade : '';
+    /* Mensagens curtas de propósito: a linha de apoio do modal é única e
+       não pode quebrar em duas, senão o formulário deixa de caber na tela. */
     if (status === 'abaixo') {
-      return 'NOK — abaixo do mínimo de ' + formatar(campo, campo.min) + un;
+      return 'NOK — abaixo do mín. ' + formatar(campo, campo.min) + un;
     }
     if (status === 'acima') {
-      return 'NOK — acima do máximo de ' + formatar(campo, campo.max) + un;
+      return 'NOK — acima do máx. ' + formatar(campo, campo.max) + un;
     }
     if (status === 'ok') return 'OK — dentro da tolerância';
     return '';
@@ -2078,15 +2160,14 @@ const Exportador = (function () {
       wrap.appendChild(ajuda);
     }
 
+    /* Uma única linha de apoio: mostra a faixa aceitável enquanto o campo
+       está vazio e vira o aviso de OK/NOK quando é preenchido. Duas linhas
+       separadas faziam o modal não caber na tela. */
     if (Avaliacao.temLimites(campo)) {
-      const faixa = document.createElement('span');
-      faixa.className = 'campo__ajuda';
-      faixa.textContent = 'Aceitável: ' + Avaliacao.faixa(campo);
-      wrap.appendChild(faixa);
-
-      const aviso = document.createElement('span');
-      aviso.className = 'campo__aviso';
-      wrap.appendChild(aviso);
+      const estado = document.createElement('span');
+      estado.className = 'campo__estado';
+      estado.textContent = 'Aceitável: ' + Avaliacao.faixa(campo);
+      wrap.appendChild(estado);
     }
 
     const evento = (campo.tipo === 'select' || campo.tipo === 'data' || campo.tipo === 'hora')
@@ -2107,8 +2188,11 @@ const Exportador = (function () {
     if (status === 'ok') wrap.classList.add('is-ok');
     else if (Avaliacao.ehNok(status)) wrap.classList.add('is-nok');
 
-    const aviso = wrap.querySelector('.campo__aviso');
-    if (aviso) aviso.textContent = Avaliacao.mensagemCampo(campo, status);
+    const estado = wrap.querySelector('.campo__estado');
+    if (estado) {
+      estado.textContent = Avaliacao.mensagemCampo(campo, status) ||
+        ('Aceitável: ' + Avaliacao.faixa(campo));
+    }
   }
 
   /* Atualiza os selos de conferência OK / NOK / NA. */

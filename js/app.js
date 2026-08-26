@@ -170,15 +170,14 @@
       wrap.appendChild(ajuda);
     }
 
+    /* Uma única linha de apoio: mostra a faixa aceitável enquanto o campo
+       está vazio e vira o aviso de OK/NOK quando é preenchido. Duas linhas
+       separadas faziam o modal não caber na tela. */
     if (Avaliacao.temLimites(campo)) {
-      const faixa = document.createElement('span');
-      faixa.className = 'campo__ajuda';
-      faixa.textContent = 'Aceitável: ' + Avaliacao.faixa(campo);
-      wrap.appendChild(faixa);
-
-      const aviso = document.createElement('span');
-      aviso.className = 'campo__aviso';
-      wrap.appendChild(aviso);
+      const estado = document.createElement('span');
+      estado.className = 'campo__estado';
+      estado.textContent = 'Aceitável: ' + Avaliacao.faixa(campo);
+      wrap.appendChild(estado);
     }
 
     const evento = (campo.tipo === 'select' || campo.tipo === 'data' || campo.tipo === 'hora')
@@ -199,8 +198,11 @@
     if (status === 'ok') wrap.classList.add('is-ok');
     else if (Avaliacao.ehNok(status)) wrap.classList.add('is-nok');
 
-    const aviso = wrap.querySelector('.campo__aviso');
-    if (aviso) aviso.textContent = Avaliacao.mensagemCampo(campo, status);
+    const estado = wrap.querySelector('.campo__estado');
+    if (estado) {
+      estado.textContent = Avaliacao.mensagemCampo(campo, status) ||
+        ('Aceitável: ' + Avaliacao.faixa(campo));
+    }
   }
 
   /* Atualiza os selos de conferência OK / NOK / NA. */

@@ -120,8 +120,7 @@ const CONFIG_INSPECAO = {
           opcoes: ['Conforme', 'Conforme com ressalva', 'Não conforme'] },
         { id: 'acao', label: 'Ação recomendada', tipo: 'select',
           opcoes: ['Liberar', 'Ajustar molde', 'Reinspecionar', 'Bloquear'] },
-        { id: 'obsCavidade', label: 'Observações da cavidade', tipo: 'textarea',
-          largura: 'total' }
+        { id: 'obsCavidade', label: 'Observações da cavidade', tipo: 'textarea' }
       ]
     }
   ]
