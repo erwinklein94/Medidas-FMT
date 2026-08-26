@@ -43,15 +43,13 @@ const CONFIG_INSPECAO = {
     'Para inspecionar o dormente, será necessário se posicionar de frente ' +
     'para a inscrição (CAVAN e RUMO).',
 
-  /* ---------------------------------------------------------------
-     CABEÇALHO — preenchido uma vez, vale para toda a inspeção.
-     Molde e Cavidade não entram aqui: vêm da navegação do site.
-     --------------------------------------------------------------- */
+  /* Cada cabeçalho identifica um bloco de até 50 moldes de uma pista. */
   cabecalho: [
-    { id: 'data',        label: 'Data da inspeção',     tipo: 'data',  obrigatorio: true },
-    { id: 'local',       label: 'Local',                tipo: 'texto', obrigatorio: true },
-    { id: 'responsavel', label: 'Inspetor responsável', tipo: 'texto', obrigatorio: true },
-    { id: 'observacoes', label: 'Observações',          tipo: 'textarea', largura: 'total' }
+    { id: 'data',        label: 'Dia',         tipo: 'data',  obrigatorio: true },
+    { id: 'local',       label: 'Local',       tipo: 'texto', obrigatorio: true },
+    { id: 'pista',       label: 'Pista',       tipo: 'texto', obrigatorio: true },
+    { id: 'lote',        label: 'Lote',        tipo: 'texto', obrigatorio: true },
+    { id: 'responsavel', label: 'Responsável', tipo: 'texto', obrigatorio: true }
   ],
 
   /* ---------------------------------------------------------------

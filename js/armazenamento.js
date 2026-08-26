@@ -8,14 +8,14 @@
 
 const Armazenamento = (function () {
   const CHAVE = 'medidas-fmt:inspecao';
-  const VERSAO = 1;
+  const VERSAO = 2;
 
   /* Estado padrão de uma inspeção vazia. */
   function estadoInicial() {
     return {
       versao: VERSAO,
       atualizadoEm: null,
-      cabecalho: {},
+      cabecalhos: [],
       /* moldes: [{ id, nome, criadoEm, cavidades: { "1": {campoId: valor}, ... } }] */
       moldes: []
     };
@@ -50,8 +50,11 @@ const Armazenamento = (function () {
     const base = estadoInicial();
     if (!dados || typeof dados !== 'object') return base;
 
-    base.cabecalho = (dados.cabecalho && typeof dados.cabecalho === 'object')
-      ? dados.cabecalho : {};
+    base.cabecalhos = Array.isArray(dados.cabecalhos) ? dados.cabecalhos
+      .filter(function (c) { return c && typeof c === 'object'; })
+      .map(function (c) {
+        return { id: String(c.id || criarGrupoId()), dados: c.dados && typeof c.dados === 'object' ? c.dados : {} };
+      }) : [];
     base.atualizadoEm = dados.atualizadoEm || null;
     base.modoExemplo = dados.modoExemplo === true;
 
@@ -62,9 +65,26 @@ const Armazenamento = (function () {
           id: String(m.id || criarId()),
           nome: String(m.nome == null ? '' : m.nome).trim() || 'Sem identificação',
           criadoEm: m.criadoEm || new Date().toISOString(),
-          cavidades: (m.cavidades && typeof m.cavidades === 'object') ? m.cavidades : {}
+          cavidades: (m.cavidades && typeof m.cavidades === 'object') ? m.cavidades : {},
+          grupoId: m.grupoId ? String(m.grupoId) : ''
         };
       }) : [];
+
+    /* Migra automaticamente o formato antigo. Se havia mais de 50 moldes,
+       cria blocos consecutivos e replica os dados gerais em cada um. */
+    if (!base.cabecalhos.length) {
+      const antigo = dados.cabecalho && typeof dados.cabecalho === 'object' ? dados.cabecalho : {};
+      const quantidade = Math.max(1, Math.ceil(base.moldes.length / 50));
+      for (let i = 0; i < quantidade; i++) {
+        const grupo = { id: criarGrupoId(), dados: Object.assign({}, antigo) };
+        base.cabecalhos.push(grupo);
+        base.moldes.slice(i * 50, (i + 1) * 50).forEach(function (m) { m.grupoId = grupo.id; });
+      }
+    }
+    const primeiro = base.cabecalhos[0].id;
+    base.moldes.forEach(function (m) {
+      if (!base.cabecalhos.some(function (c) { return c.id === m.grupoId; })) m.grupoId = primeiro;
+    });
 
     return base;
   }
@@ -91,6 +111,10 @@ const Armazenamento = (function () {
     return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   }
 
+  function criarGrupoId() {
+    return 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
   return {
     estadoInicial: estadoInicial,
     carregar: carregar,
@@ -98,6 +122,7 @@ const Armazenamento = (function () {
     limpar: limpar,
     normalizar: normalizar,
     criarId: criarId,
+    criarGrupoId: criarGrupoId,
     disponivel: disponivel
   };
 })();

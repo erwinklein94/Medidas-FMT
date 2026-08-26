@@ -70,8 +70,10 @@ const Sincronizacao = (function () {
 
   function temConteudo(estado) {
     return !!(estado && (
-      (estado.cabecalho && Object.keys(estado.cabecalho).some(function (chave) {
-        return estado.cabecalho[chave] !== '' && estado.cabecalho[chave] != null;
+      (Array.isArray(estado.cabecalhos) && estado.cabecalhos.some(function (cabecalho) {
+        return cabecalho.dados && Object.keys(cabecalho.dados).some(function (chave) {
+          return cabecalho.dados[chave] !== '' && cabecalho.dados[chave] != null;
+        });
       })) || (Array.isArray(estado.moldes) && estado.moldes.length)
     ));
   }

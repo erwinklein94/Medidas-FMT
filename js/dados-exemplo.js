@@ -53,11 +53,17 @@ const DadosExemplo = (function () {
 
   function aplicar(estado) {
     if (!estado) return false;
+    estado.cabecalhos = estado.cabecalhos || [];
+    let cabecalhosCriados = false;
+    while (estado.cabecalhos.length < 2) {
+      estado.cabecalhos.push({ id: Armazenamento.criarGrupoId(), dados: {} });
+      cabecalhosCriados = true;
+    }
     const moldesAtuais = Array.isArray(estado.moldes) ? estado.moldes : [];
     const exemplosAtuais = moldesAtuais.filter(function (molde) {
       return String(molde.id || '').indexOf('exemplo-molde-') === 0;
     });
-    if (exemplosAtuais.length === 20) return false;
+    if (exemplosAtuais.length === 20) return cabecalhosCriados;
 
     /* Preserva qualquer coleta real que ja exista e recompõe apenas a base exemplo. */
     const moldesReais = moldesAtuais.filter(function (molde) {
@@ -70,13 +76,14 @@ const DadosExemplo = (function () {
       String(agora.getDate()).padStart(2, '0');
 
     estado.modoExemplo = true;
-    estado.cabecalho = estado.cabecalho || {};
-    if (!moldesReais.length && !estado.cabecalho.data) estado.cabecalho.data = data;
-    if (!moldesReais.length && !estado.cabecalho.local) estado.cabecalho.local = 'Base demonstrativa — 20 moldes';
-    if (!moldesReais.length && !estado.cabecalho.responsavel) estado.cabecalho.responsavel = 'Dados de exemplo';
-    if (!moldesReais.length && !estado.cabecalho.observacoes) {
-      estado.cabecalho.observacoes = 'Dados temporários para visualizar gráficos e indicadores.';
+    let grupo = estado.cabecalhos[0];
+    if (!grupo) {
+      grupo = { id: Armazenamento.criarGrupoId(), dados: {} };
+      estado.cabecalhos.push(grupo);
     }
+    if (!moldesReais.length) grupo.dados = Object.assign({
+      data: data, local: 'Base demonstrativa', pista: 'Pista exemplo', lote: 'Lote exemplo', responsavel: 'Dados de exemplo'
+    }, grupo.dados);
 
     estado.moldes = moldesReais;
     for (let molde = 1; molde <= 20; molde++) {
@@ -89,7 +96,8 @@ const DadosExemplo = (function () {
         id: 'exemplo-molde-' + String(molde).padStart(2, '0'),
         nome: 'EX-' + String(molde).padStart(2, '0'),
         criadoEm: new Date(agora.getTime() - (20 - molde) * 3600000).toISOString(),
-        cavidades: cavidades
+        cavidades: cavidades,
+        grupoId: grupo.id
       });
     }
     return true;

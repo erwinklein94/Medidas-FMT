@@ -223,52 +223,37 @@
   }
 
   /* ---------------------------------------------------------------
-     Cabeçalho da inspeção
+     Blocos de cabeçalho + até 50 moldes
      --------------------------------------------------------------- */
-  function montarCabecalho() {
-    const form = $('#formCabecalho');
-    form.innerHTML = '';
-    CONFIG_INSPECAO.cabecalho.forEach(function (campo) {
-      form.appendChild(criarCampo(campo, estado.cabecalho[campo.id], function (id, valor) {
-        estado.cabecalho[id] = valor;
-        persistir();
-        atualizarResumoCabecalho();
-      }));
-    });
-    atualizarResumoCabecalho();
+  function moldesDoGrupo(grupoId) {
+    return estado.moldes.filter(function (molde) { return molde.grupoId === grupoId; });
   }
 
-  function atualizarResumoCabecalho() {
-    const c = estado.cabecalho;
-    const partes = [];
-    if (c.data) {
-      const p = String(c.data).split('-');
-      partes.push(p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : c.data);
+  function dataHoje() {
+    const hoje = new Date();
+    return hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0') + '-' +
+      String(hoje.getDate()).padStart(2, '0');
+  }
+
+  function novoCabecalho() {
+    return { id: Armazenamento.criarGrupoId(), dados: { data: dataHoje(), local: '', pista: '', lote: '', responsavel: '' } };
+  }
+
+  function preencherAte50(grupoId) {
+    const moldes = moldesDoGrupo(grupoId);
+    for (let n = moldes.length + 1; n <= 50; n++) {
+      let nome = String(n).padStart(2, '0');
+      while (moldes.some(function (m) { return m.nome.toLowerCase() === nome.toLowerCase(); })) {
+        nome = String(Number(nome) + 1).padStart(2, '0');
+      }
+      const molde = { id: Armazenamento.criarId(), nome: nome, criadoEm: new Date().toISOString(), cavidades: {}, grupoId: grupoId };
+      estado.moldes.push(molde);
+      moldes.push(molde);
     }
-    if (c.local) partes.push(c.local);
-    if (c.responsavel) partes.push(c.responsavel);
-
-    const faltando = CONFIG_INSPECAO.cabecalho
-      .filter(function (campo) {
-        return campo.obrigatorio && !String(c[campo.id] || '').trim();
-      });
-
-    $('#resumoCabecalho').textContent = partes.length
-      ? partes.join(' · ') + (faltando.length ? ' — faltam ' + faltando.length + ' campo(s)' : '')
-      : 'Preencha antes de iniciar';
   }
 
-  /* ---------------------------------------------------------------
-     Moldes
-     --------------------------------------------------------------- */
-  function montarMoldes() {
-    const grade = $('#gradeMoldes');
-    grade.innerHTML = '';
-    $('#vazioMoldes').hidden = estado.moldes.length > 0;
-
-    estado.moldes.forEach(function (molde) {
+  function criarCartaoMolde(molde) {
       const st = Avaliacao.statusMolde(molde);
-
       const botao = document.createElement('button');
       botao.type = 'button';
       botao.className = 'molde';
@@ -303,9 +288,54 @@
         '</div>';
 
       botao.addEventListener('click', function () { abrirMolde(molde.id); });
-      grade.appendChild(botao);
-    });
+      return botao;
+  }
 
+  function montarMoldes() {
+    const raiz = $('#gruposInspecao');
+    raiz.innerHTML = '';
+    estado.cabecalhos.forEach(function (grupo, indice) {
+      const moldes = moldesDoGrupo(grupo.id);
+      const secao = document.createElement('section');
+      secao.className = 'cartao grupo-inspecao';
+      secao.dataset.grupo = grupo.id;
+      secao.innerHTML =
+        '<div class="grupo-inspecao__titulo"><div><span class="grupo-inspecao__numero">Cabeçalho ' + (indice + 1) + '</span>' +
+        '<strong>' + esc(grupo.dados.pista || 'Pista não informada') + '</strong></div>' +
+        (estado.cabecalhos.length > 1 ? '<button class="btn btn--perigo-fantasma" type="button" data-excluir-grupo>Excluir bloco</button>' : '') + '</div>' +
+        '<div class="cartao__corpo"><form class="grade-campos grupo-cabecalho" autocomplete="off"></form>' +
+        '<div class="grupo-inspecao__moldes"><div class="grupo-inspecao__moldes-topo"><div><strong>Moldes</strong><span>' + moldes.length + ' de 50</span></div></div>' +
+        '<form class="adicionar-molde"><label class="campo campo--inline"><span class="campo__rotulo">Identificação do molde</span>' +
+        '<input class="campo__input" type="text" placeholder="Ex.: 01" maxlength="24"></label>' +
+        '<button class="btn btn--primario" type="submit">+ Adicionar molde</button></form>' +
+        '<div class="grade-moldes"></div><p class="vazio"' + (moldes.length ? ' hidden' : '') + '>Nenhum molde neste cabeçalho.</p></div></div>';
+
+      const formCabecalho = secao.querySelector('.grupo-cabecalho');
+      CONFIG_INSPECAO.cabecalho.forEach(function (campo) {
+        formCabecalho.appendChild(criarCampo(campo, grupo.dados[campo.id], function (id, valor) {
+          grupo.dados[id] = valor;
+          persistir();
+          if (id === 'pista') secao.querySelector('.grupo-inspecao__titulo strong').textContent = valor || 'Pista não informada';
+        }));
+      });
+      secao.querySelector('.adicionar-molde').addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        const input = this.querySelector('input');
+        const molde = adicionarMolde(input.value, grupo.id);
+        if (molde) input.value = '';
+      });
+      const excluir = secao.querySelector('[data-excluir-grupo]');
+      if (excluir) excluir.addEventListener('click', function () {
+        const mensagem = moldes.length ? 'Excluir este cabeçalho e seus ' + moldes.length + ' molde(s)?' : 'Excluir este cabeçalho?';
+        if (!confirm(mensagem)) return;
+        estado.moldes = estado.moldes.filter(function (m) { return m.grupoId !== grupo.id; });
+        estado.cabecalhos = estado.cabecalhos.filter(function (c) { return c.id !== grupo.id; });
+        persistir(); montarMoldes();
+      });
+      const grade = secao.querySelector('.grade-moldes');
+      moldes.forEach(function (molde) { grade.appendChild(criarCartaoMolde(molde)); });
+      raiz.appendChild(secao);
+    });
     atualizarProgresso();
   }
 
@@ -331,20 +361,22 @@
     }
     $('#progressoTexto').textContent = texto;
 
-    $('#resumoMoldes').textContent = estado.moldes.length
-      ? 'Cada molde possui ' + CONFIG_INSPECAO.cavidadesPorMolde + ' cavidades'
-      : 'Cada molde possui ' + CONFIG_INSPECAO.cavidadesPorMolde + ' cavidades';
   }
 
-  function adicionarMolde(nome) {
+  function adicionarMolde(nome, grupoId) {
+    const moldesGrupo = moldesDoGrupo(grupoId);
+    if (moldesGrupo.length >= 50) {
+      avisar('Este cabeçalho já possui o limite de 50 moldes.', 'erro');
+      return null;
+    }
     nome = String(nome || '').trim();
     if (!nome) {
       /* sugere o próximo número livre */
-      let n = estado.moldes.length + 1;
-      while (estado.moldes.some(function (m) { return m.nome === String(n); })) n++;
+      let n = moldesGrupo.length + 1;
+      while (moldesGrupo.some(function (m) { return m.nome === String(n); })) n++;
       nome = String(n);
     }
-    if (estado.moldes.some(function (m) {
+    if (moldesGrupo.some(function (m) {
       return m.nome.toLowerCase() === nome.toLowerCase();
     })) {
       avisar('Já existe um molde com a identificação "' + nome + '".', 'erro');
@@ -354,7 +386,8 @@
       id: Armazenamento.criarId(),
       nome: nome,
       criadoEm: new Date().toISOString(),
-      cavidades: {}
+      cavidades: {},
+      grupoId: grupoId
     };
     estado.moldes.push(molde);
     persistir();
@@ -566,18 +599,14 @@
      Ligações de eventos
      --------------------------------------------------------------- */
   function ligarEventos() {
-    /* Cabeçalho recolhível */
-    $('#btnToggleCabecalho').addEventListener('click', function () {
-      const aberto = this.getAttribute('aria-expanded') === 'true';
-      this.setAttribute('aria-expanded', String(!aberto));
-    });
-
-    /* Adicionar molde */
-    $('#formAdicionarMolde').addEventListener('submit', function (ev) {
-      ev.preventDefault();
-      const input = $('#inputNovoMolde');
-      const molde = adicionarMolde(input.value);
-      if (molde) { input.value = ''; input.focus(); }
+    $('#btnNovoCabecalho').addEventListener('click', function () {
+      const grupo = novoCabecalho();
+      estado.cabecalhos.push(grupo);
+      preencherAte50(grupo.id);
+      persistir();
+      montarMoldes();
+      const blocos = document.querySelectorAll('.grupo-inspecao');
+      if (blocos.length) blocos[blocos.length - 1].scrollIntoView({ behavior: 'smooth' });
     });
 
     /* Painel */
@@ -649,7 +678,9 @@
       )) return;
       Armazenamento.limpar();
       estado = Armazenamento.estadoInicial();
-      montarCabecalho();
+      const grupo = novoCabecalho();
+      estado.cabecalhos.push(grupo);
+      preencherAte50(grupo.id);
       montarMoldes();
       avisar('Inspeção limpa.');
     });
@@ -674,15 +705,12 @@
     $('#subtituloApp').textContent = CONFIG_INSPECAO.subtitulo;
     document.title = CONFIG_INSPECAO.titulo + ' | Rumo';
 
-    /* Preenche a data de hoje na primeira abertura. */
-    if (!estado.cabecalho.data) {
-      const hoje = new Date();
-      estado.cabecalho.data = hoje.getFullYear() + '-' +
-        String(hoje.getMonth() + 1).padStart(2, '0') + '-' +
-        String(hoje.getDate()).padStart(2, '0');
-    }
-
-    montarCabecalho();
+    if (!estado.cabecalhos.length) estado.cabecalhos.push(novoCabecalho());
+    estado.cabecalhos.forEach(function (grupo) {
+      if (!grupo.dados.data) grupo.dados.data = dataHoje();
+      preencherAte50(grupo.id);
+    });
+    Armazenamento.salvar(estado);
     montarMoldes();
     ligarEventos();
 

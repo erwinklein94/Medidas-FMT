@@ -122,23 +122,19 @@ const Exportador = (function () {
     por(ws, l, 0, CONFIG_INSPECAO.titulo.toUpperCase() + ' — ' + CONFIG_INSPECAO.subtitulo,
       estiloTitulo());
     por(ws, l, 1, '', estiloTitulo());
-    ws['!merges'] = [{ s: { r: l, c: 0 }, e: { r: l, c: 1 } }];
+    ws['!merges'] = [{ s: { r: l, c: 0 }, e: { r: l, c: 6 } }];
     ws['!rows'] = [{ hpt: 26 }];
     l += 2;
 
-    por(ws, l, 0, 'Campo', estiloColuna());
-    por(ws, l, 1, 'Valor', estiloColuna());
+    const nomes = ['Cabeçalho', 'Dia', 'Local', 'Pista', 'Lote', 'Responsável', 'Quantidade de moldes'];
+    nomes.forEach(function (nome, i) { por(ws, l, i, nome, estiloColuna()); });
     l++;
 
-    CONFIG_INSPECAO.cabecalho.forEach(function (campo) {
-      let valor = estado.cabecalho[campo.id];
-      if (campo.tipo === 'checkbox') valor = valor ? 'Sim' : 'Não';
-      por(ws, l, 0, campo.label, estiloCelula({
-        font: { name: FONTE, sz: 10, bold: true, color: { rgb: '003865' } },
-        fill: { fgColor: { rgb: CINZA_50 } },
-        border: borda()
-      }));
-      por(ws, l, 1, valor === undefined || valor === null ? '' : valor, estiloCelula());
+    estado.cabecalhos.forEach(function (grupo, indice) {
+      const d = grupo.dados || {};
+      const valores = [indice + 1, d.data, d.local, d.pista, d.lote, d.responsavel,
+        estado.moldes.filter(function (m) { return m.grupoId === grupo.id; }).length];
+      valores.forEach(function (valor, i) { por(ws, l, i, valor == null ? '' : valor, estiloCelula()); });
       l++;
     });
 
@@ -159,8 +155,8 @@ const Exportador = (function () {
       l++;
     }
 
-    ws['!cols'] = [{ wch: 26 }, { wch: 62 }];
-    return fecharPlanilha(ws, l, 2);
+    ws['!cols'] = [{ wch: 12 }, { wch: 13 }, { wch: 24 }, { wch: 18 }, { wch: 18 }, { wch: 25 }, { wch: 20 }];
+    return fecharPlanilha(ws, l, nomes.length);
   }
 
   /* ---------------------------------------------------------------
@@ -172,7 +168,7 @@ const Exportador = (function () {
     const cols = [];
 
     /* Colunas fixas de identificação + colunas vindas de campos.js */
-    const fixas = ['Molde', 'Cavidade'];
+    const fixas = ['Dia', 'Local', 'Pista', 'Lote', 'Responsável', 'Molde', 'Cavidade'];
     const campos = CONFIG_INSPECAO.todosCampos;
 
     /* --- Linha 0: seções --- */
@@ -226,14 +222,19 @@ const Exportador = (function () {
     let totalLinhas = 0;
 
     estado.moldes.forEach(function (molde) {
+      const grupo = estado.cabecalhos.filter(function (g) { return g.id === molde.grupoId; })[0];
+      const identificacao = grupo ? grupo.dados : {};
       for (let n = 1; n <= CONFIG_INSPECAO.cavidadesPorMolde; n++) {
         const dados = molde.cavidades[String(n)] || {};
         const st = Avaliacao.statusCavidade(dados);
 
-        por(ws, l, 0, molde.nome, estiloCelula({
+        [identificacao.data, identificacao.local, identificacao.pista, identificacao.lote, identificacao.responsavel].forEach(function (valor, i) {
+          por(ws, l, i, valor || '', estiloCelula());
+        });
+        por(ws, l, 5, molde.nome, estiloCelula({
           font: { name: FONTE, sz: 10, bold: true, color: { rgb: '003865' } }, border: borda()
         }));
-        por(ws, l, 1, n, estiloCelula({
+        por(ws, l, 6, n, estiloCelula({
           alignment: { vertical: 'center', horizontal: 'center' },
           font: { name: FONTE, sz: 10, bold: true, color: { rgb: '003865' } },
           border: borda()
@@ -294,7 +295,7 @@ const Exportador = (function () {
       )
     };
     ws['!freeze'] = {
-      xSplit: '3', ySplit: '2', topLeftCell: 'D3',
+      xSplit: '7', ySplit: '2', topLeftCell: 'H3',
       activePane: 'bottomRight', state: 'frozen'
     };
 
@@ -306,31 +307,34 @@ const Exportador = (function () {
      --------------------------------------------------------------- */
   function abaResumo(estado) {
     const ws = {};
-    const cabecalhos = ['Molde', 'Cavidades', 'Preenchidas', 'NOK', 'Pendentes', 'Situação'];
+    const cabecalhos = ['Dia', 'Local', 'Pista', 'Lote', 'Responsável', 'Molde', 'Cavidades', 'Preenchidas', 'NOK', 'Pendentes', 'Situação'];
     cabecalhos.forEach(function (h, i) { por(ws, 0, i, h, estiloColuna()); });
 
     let l = 1;
     estado.moldes.forEach(function (molde) {
+      const grupo = estado.cabecalhos.filter(function (g) { return g.id === molde.grupoId; })[0];
+      const d = grupo ? grupo.dados : {};
       const st = Avaliacao.statusMolde(molde);
       const pendentes = st.total - st.completas;
 
-      por(ws, l, 0, molde.nome, estiloCelula({
+      [d.data, d.local, d.pista, d.lote, d.responsavel].forEach(function (valor, i) { por(ws, l, i, valor || '', estiloCelula()); });
+      por(ws, l, 5, molde.nome, estiloCelula({
         font: { name: FONTE, sz: 10, bold: true, color: { rgb: '003865' } }, border: borda()
       }));
-      por(ws, l, 1, st.total, estiloCelula(), '0');
-      por(ws, l, 2, st.completas, estiloCelula(), '0');
-      por(ws, l, 3, st.nok, st.nok ? estiloNok() : estiloCelula(), '0');
-      por(ws, l, 4, pendentes, estiloCelula(), '0');
+      por(ws, l, 6, st.total, estiloCelula(), '0');
+      por(ws, l, 7, st.completas, estiloCelula(), '0');
+      por(ws, l, 8, st.nok, st.nok ? estiloNok() : estiloCelula(), '0');
+      por(ws, l, 9, pendentes, estiloCelula(), '0');
 
       let rotulo, estilo;
       if (st.nok) { rotulo = 'Com NOK'; estilo = estiloNok(); }
       else if (st.completas === st.total) { rotulo = 'Completo'; estilo = estiloOk(); }
       else { rotulo = 'Em andamento'; estilo = estiloNa(); }
-      por(ws, l, 5, rotulo, estilo);
+      por(ws, l, 10, rotulo, estilo);
       l++;
     });
 
-    ws['!cols'] = [{ wch: 16 }, { wch: 12 }, { wch: 13 }, { wch: 8 }, { wch: 12 }, { wch: 16 }];
+    ws['!cols'] = [{ wch: 13 }, { wch: 22 }, { wch: 16 }, { wch: 16 }, { wch: 24 }, { wch: 16 }, { wch: 12 }, { wch: 13 }, { wch: 8 }, { wch: 12 }, { wch: 16 }];
     return fecharPlanilha(ws, l, cabecalhos.length);
   }
 
@@ -339,8 +343,9 @@ const Exportador = (function () {
      --------------------------------------------------------------- */
   function nomeArquivo(estado) {
     const partes = ['Medidas-FMT'];
-    if (estado.cabecalho.local) partes.push(String(estado.cabecalho.local).trim());
-    partes.push(estado.cabecalho.data || new Date().toISOString().slice(0, 10));
+    const primeiro = estado.cabecalhos[0] ? estado.cabecalhos[0].dados : {};
+    if (primeiro.local) partes.push(String(primeiro.local).trim());
+    partes.push(primeiro.data || new Date().toISOString().slice(0, 10));
     return partes.join('_')
       .replace(/[\\/:*?"<>|]/g, '-')
       .replace(/\s+/g, '-') + '.xlsx';
