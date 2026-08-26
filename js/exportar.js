@@ -172,7 +172,7 @@ const Exportador = (function () {
     const cols = [];
 
     /* Colunas fixas de identificação + colunas vindas de campos.js */
-    const fixas = ['Pista', 'Molde', 'Cavidade'];
+    const fixas = ['Molde', 'Cavidade'];
     const campos = CONFIG_INSPECAO.todosCampos;
 
     /* --- Linha 0: seções --- */
@@ -230,11 +230,10 @@ const Exportador = (function () {
         const dados = molde.cavidades[String(n)] || {};
         const st = Avaliacao.statusCavidade(dados);
 
-        por(ws, l, 0, estado.cabecalho.pista || '', estiloCelula());
-        por(ws, l, 1, molde.nome, estiloCelula({
+        por(ws, l, 0, molde.nome, estiloCelula({
           font: { name: FONTE, sz: 10, bold: true, color: { rgb: '003865' } }, border: borda()
         }));
-        por(ws, l, 2, n, estiloCelula({
+        por(ws, l, 1, n, estiloCelula({
           alignment: { vertical: 'center', horizontal: 'center' },
           font: { name: FONTE, sz: 10, bold: true, color: { rgb: '003865' } },
           border: borda()
@@ -340,9 +339,11 @@ const Exportador = (function () {
      --------------------------------------------------------------- */
   function nomeArquivo(estado) {
     const partes = ['Medidas-FMT'];
-    if (estado.cabecalho.pista) partes.push('Pista-' + estado.cabecalho.pista);
+    if (estado.cabecalho.local) partes.push(String(estado.cabecalho.local).trim());
     partes.push(estado.cabecalho.data || new Date().toISOString().slice(0, 10));
-    return partes.join('_').replace(/[\\/:*?"<>|]/g, '-') + '.xlsx';
+    return partes.join('_')
+      .replace(/[\\/:*?"<>|]/g, '-')
+      .replace(/\s+/g, '-') + '.xlsx';
   }
 
   function exportarXlsx(estado) {

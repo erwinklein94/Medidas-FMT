@@ -862,6 +862,209 @@ button, input, select, textarea { font: inherit; color: inherit; }
 #formCavidade .conferencia__motivo { font-size: 0.66rem; line-height: 1.25; }
 
 /* ---------------------------------------------------------------
+   ABAS (Registros / Dashboard)
+   --------------------------------------------------------------- */
+.abas {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 18px;
+  display: flex;
+  gap: 4px;
+}
+
+.aba {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px 11px;
+  border: 0;
+  border-radius: var(--rumo-raio-sm) var(--rumo-raio-sm) 0 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--rumo-transicao), color var(--rumo-transicao);
+}
+
+.aba:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
+.aba:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(50, 166, 230, 0.55);
+}
+
+.aba.is-ativa {
+  background: var(--bg);
+  color: var(--rumo-azul);
+}
+
+/* ---------------------------------------------------------------
+   INDICADORES
+   --------------------------------------------------------------- */
+.indicadores {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.indicador {
+  padding: 16px 18px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--rumo-raio);
+  box-shadow: var(--rumo-sombra);
+}
+
+.indicador__rotulo {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--rumo-texto-claro);
+}
+
+.indicador__valor {
+  margin: 4px 0 2px;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--texto-forte);
+  line-height: 1.1;
+}
+
+.indicador__valor.is-ok  { color: var(--rumo-verde); }
+.indicador__valor.is-nok { color: var(--rumo-erro); }
+
+.indicador__nota {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--rumo-texto-claro);
+}
+
+/* hero: exatamente um por tela */
+.indicador--heroi {
+  background: var(--rumo-azul);
+  border-color: var(--rumo-azul);
+}
+.indicador--heroi .indicador__rotulo { color: var(--rumo-cinza); }
+.indicador--heroi .indicador__valor  { color: #fff; font-size: 3rem; }
+.indicador--heroi .indicador__nota   { color: rgba(255, 255, 255, 0.78); }
+
+/* ---------------------------------------------------------------
+   GRÁFICOS
+   --------------------------------------------------------------- */
+.grafico { padding: 18px; }
+
+.grafico__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 18px;
+  margin-bottom: 14px;
+}
+
+.grafico__titulo {
+  flex: 1 1 240px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--texto-forte);
+}
+
+.grafico__sub {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--rumo-texto-claro);
+  max-width: 68ch;
+}
+
+.grafico__filtro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--rumo-texto-claro);
+}
+
+.grafico__filtro .campo__select { padding: 6px 9px; font-size: 0.82rem; width: auto; }
+
+.grafico__area { overflow-x: auto; }
+
+.grafico__par {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+/* ---------------------------------------------------------------
+   TABELA
+   --------------------------------------------------------------- */
+.tabela-rolagem { overflow-x: auto; }
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tabela th, .tabela td {
+  padding: 8px 11px;
+  border-bottom: 1px solid var(--borda);
+  text-align: right;
+}
+
+.tabela thead th {
+  background: var(--rumo-azul);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: right;
+  position: sticky;
+  top: 0;
+}
+
+.tabela thead th:first-child,
+.tabela tbody th { text-align: left; }
+
+.tabela tbody th {
+  font-weight: 700;
+  color: var(--texto-forte);
+  white-space: nowrap;
+}
+
+.tabela tbody tr:nth-child(even) { background: var(--rumo-cinza-50); }
+
+.tabela td.bom     { color: var(--rumo-verde); font-weight: 700; }
+.tabela td.atencao { color: #8A6A00; font-weight: 700; }
+.tabela td.ruim    { color: var(--rumo-erro); font-weight: 700; }
+
+/* ---------------------------------------------------------------
+   DICA FLUTUANTE DOS GRÁFICOS
+   --------------------------------------------------------------- */
+.dica {
+  position: fixed;
+  z-index: 95;
+  max-width: 280px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  background: var(--rumo-azul-noite);
+  color: #fff;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  pointer-events: none;
+  box-shadow: 0 6px 20px rgba(0, 30, 54, 0.3);
+}
+
+/* alvo de toque generoso nas marcas dos gráficos */
+.grafico__area [data-dica] { cursor: help; }
+.grafico__area [data-dica]:focus-visible {
+  outline: 2px solid var(--rumo-azul-claro);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------
    AVISO (TOAST)
    --------------------------------------------------------------- */
 .aviso {
@@ -908,6 +1111,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
   .painel, .modal { align-items: center; }
   .painel__caixa, .modal__caixa { border-radius: var(--rumo-raio); }
+
+  .indicadores { grid-template-columns: repeat(2, 1fr); }
+  .grafico__par { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 1000px) {
+  .indicadores { grid-template-columns: 1.4fr 1fr 1fr 1fr; }
 }
 
 @media (min-width: 900px) {

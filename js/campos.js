@@ -49,20 +49,9 @@ const CONFIG_INSPECAO = {
      --------------------------------------------------------------- */
   cabecalho: [
     { id: 'data',        label: 'Data da inspeção',     tipo: 'data',  obrigatorio: true },
-    { id: 'hora',        label: 'Hora de início',       tipo: 'hora' },
-    { id: 'pista',       label: 'Pista',                tipo: 'texto', obrigatorio: true,
-      ajuda: 'Pista de produção onde os moldes foram inspecionados' },
-    { id: 'local',       label: 'Local / Fábrica',      tipo: 'texto', obrigatorio: true },
-    { id: 'trecho',      label: 'Trecho da via',        tipo: 'texto',
-      ajuda: 'Trecho da via permanente de destino' },
-    { id: 'kmInicial',   label: 'KM inicial',           tipo: 'texto' },
-    { id: 'kmFinal',     label: 'KM final',             tipo: 'texto' },
-    { id: 'lote',        label: 'Lote / OP',            tipo: 'texto' },
+    { id: 'local',       label: 'Local',                tipo: 'texto', obrigatorio: true },
     { id: 'responsavel', label: 'Inspetor responsável', tipo: 'texto', obrigatorio: true },
-    { id: 'matricula',   label: 'Matrícula',            tipo: 'texto' },
-    { id: 'turno',       label: 'Turno',                tipo: 'select',
-      opcoes: ['1º turno', '2º turno', '3º turno'] },
-    { id: 'observacoes', label: 'Observações gerais',   tipo: 'textarea', largura: 'total' }
+    { id: 'observacoes', label: 'Observações',          tipo: 'textarea', largura: 'total' }
   ],
 
   /* ---------------------------------------------------------------
@@ -73,6 +62,7 @@ const CONFIG_INSPECAO = {
     {
       id: 'externas',
       titulo: 'Distância interna entre ombreiras externas',
+      curto: 'Externas',
       campos: [
         { id: 'ext_mesa', label: 'Mesa (W,X)', tipo: 'numero', unidade: 'mm',
           nominal: 1834.12, min: 1833.62, max: 1835.62,
@@ -87,6 +77,7 @@ const CONFIG_INSPECAO = {
     {
       id: 'ladoA',
       titulo: 'Distância interna entre ombreiras — Lado A',
+      curto: 'Lado A',
       campos: [
         { id: 'a_mesa', label: 'Mesa (W,X)', tipo: 'numero', unidade: 'mm',
           nominal: 154.50, min: 154.00, max: 156.00,
@@ -101,6 +92,7 @@ const CONFIG_INSPECAO = {
     {
       id: 'ladoB',
       titulo: 'Distância interna entre ombreiras — Lado B',
+      curto: 'Lado B',
       campos: [
         { id: 'b_mesa', label: 'Mesa (W,X)', tipo: 'numero', unidade: 'mm',
           nominal: 154.50, min: 154.00, max: 156.00,
@@ -115,6 +107,7 @@ const CONFIG_INSPECAO = {
     {
       id: 'conclusao',
       titulo: 'Conclusão',
+      curto: 'Conclusão',
       campos: [
         { id: 'situacao', label: 'Situação da cavidade', tipo: 'select',
           opcoes: ['Conforme', 'Conforme com ressalva', 'Não conforme'] },
@@ -129,7 +122,11 @@ const CONFIG_INSPECAO = {
 /* Lista achatada de todos os campos de cavidade — usada pelo app e pela exportação. */
 CONFIG_INSPECAO.todosCampos = CONFIG_INSPECAO.secoes.reduce(function (acc, secao) {
   secao.campos.forEach(function (campo) {
-    acc.push(Object.assign({ secao: secao.titulo, secaoId: secao.id }, campo));
+    acc.push(Object.assign({
+      secao: secao.titulo,
+      secaoId: secao.id,
+      secaoCurto: secao.curto || secao.titulo
+    }, campo));
   });
   return acc;
 }, []);

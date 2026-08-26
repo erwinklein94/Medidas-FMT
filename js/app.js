@@ -243,7 +243,6 @@
       const p = String(c.data).split('-');
       partes.push(p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : c.data);
     }
-    if (c.pista) partes.push('Pista ' + c.pista);
     if (c.local) partes.push(c.local);
     if (c.responsavel) partes.push(c.responsavel);
 
@@ -441,8 +440,7 @@
     cavidadeAberta = numero;
     rascunho = Object.assign({}, molde.cavidades[String(numero)] || {});
 
-    $('#modalKicker').textContent = 'Molde ' + molde.nome +
-      (estado.cabecalho.pista ? ' · Pista ' + estado.cabecalho.pista : '');
+    $('#modalKicker').textContent = 'Molde ' + molde.nome;
     $('#modalTitulo').textContent = CONFIG_INSPECAO.rotuloCavidade + ' ' + numero;
 
     const nota = $('#modalNota');
@@ -526,33 +524,34 @@
   /* ---------------------------------------------------------------
      Ações gerais
      --------------------------------------------------------------- */
-  function baixarJson() {
-    const blob = new Blob([JSON.stringify(estado, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'medidas-fmt-' + (estado.cabecalho.data || 'inspecao') + '.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+  /* ---------------------------------------------------------------
+     Navegação entre as páginas (Registros / Dashboard)
+     --------------------------------------------------------------- */
+  function irPara(pagina) {
+    const ehDashboard = pagina === 'dashboard';
 
-  function importarJson(arquivo) {
-    const leitor = new FileReader();
-    leitor.onload = function () {
-      try {
-        const dados = JSON.parse(leitor.result);
-        estado = Armazenamento.normalizar(dados);
-        persistir();
-        montarCabecalho();
-        montarMoldes();
-        avisar('Inspeção importada com sucesso.', 'ok');
-      } catch (e) {
-        avisar('Arquivo inválido — não foi possível importar.', 'erro');
-      }
-    };
-    leitor.readAsText(arquivo);
+    const registros = $('#paginaRegistros');
+    const dashboard = $('#paginaDashboard');
+    registros.hidden = ehDashboard;
+    registros.style.display = ehDashboard ? 'none' : '';
+    dashboard.hidden = !ehDashboard;
+    dashboard.style.display = ehDashboard ? '' : 'none';
+
+    document.querySelectorAll('.aba').forEach(function (aba) {
+      const ativa = aba.dataset.pagina === pagina;
+      aba.classList.toggle('is-ativa', ativa);
+      if (ativa) aba.setAttribute('aria-current', 'page');
+      else aba.removeAttribute('aria-current');
+    });
+
+    /* O dashboard é sempre recalculado ao abrir: os dados mudam na
+       outra página e ele precisa refletir o estado atual. */
+    if (ehDashboard) Dashboard.renderizar(estado);
+
+    if (window.location.hash !== '#' + pagina) {
+      history.replaceState(null, '', '#' + pagina);
+    }
+    window.scrollTo(0, 0);
   }
 
   /* ---------------------------------------------------------------
@@ -628,15 +627,8 @@
       else avisar(r.erro, 'erro');
     });
 
-    $('#btnSalvarJson').addEventListener('click', baixarJson);
-
-    $('#btnImportar').addEventListener('click', function () {
-      $('#inputImportar').click();
-    });
-
-    $('#inputImportar').addEventListener('change', function () {
-      if (this.files && this.files[0]) importarJson(this.files[0]);
-      this.value = '';
+    document.querySelectorAll('.aba').forEach(function (aba) {
+      aba.addEventListener('click', function () { irPara(this.dataset.pagina); });
     });
 
     $('#btnLimpar').addEventListener('click', function () {
@@ -675,6 +667,8 @@
     montarCabecalho();
     montarMoldes();
     ligarEventos();
+
+    irPara(window.location.hash === '#dashboard' ? 'dashboard' : 'registros');
 
     if (!Armazenamento.disponivel()) {
       avisar('Este navegador bloqueou o armazenamento local — os dados não serão salvos.', 'erro');

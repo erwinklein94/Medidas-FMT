@@ -8,15 +8,43 @@ computador. Visual seguindo o [brand book da Rumo](https://brandbook.rumolog.com
 
 ---
 
-## Como o inspetor usa
+O site tem duas páginas: **Registros**, onde o inspetor anota, e **Dashboard**,
+onde a inspeção vira estatística.
 
-1. **Dados da inspeção** — preenche uma vez: data, pista, local, trecho, KM,
-   lote, responsável, matrícula e turno.
+## Página de Registros
+
+1. **Dados da inspeção** — preenche uma vez: data, local, inspetor responsável
+   e observações.
 2. **Moldes** — adiciona cada molde inspecionado (ex.: `01`, `02`, `A-14`).
 3. **Cavidades** — ao clicar num molde, abrem as **6 cavidades** (6 dormentes).
 4. **Medidas** — ao clicar numa cavidade, abre o formulário com os campos da
    planilha oficial. Tudo é salvo automaticamente no navegador.
 5. **Exportar Excel** — gera o `.xlsx` com todas as cavidades preenchidas.
+
+## Página de Dashboard
+
+Calculada ao vivo a partir das cavidades preenchidas:
+
+- **Indicadores** — conformidade das medidas, cavidades medidas, medidas fora
+  da tolerância e o menor Cpk do lote.
+- **Média e desvio padrão por medida** — cada uma das 6 medidas com sua média
+  (ponto), ±1 desvio padrão (barra) e a faixa de tolerância ao fundo.
+- **Carta de controle** — cada cavidade na ordem em que foi medida, com LIE,
+  LSE e a média; pontos verdes dentro da faixa, vermelhos fora.
+- **Distribuição dos desvios** — histograma que mostra se o processo está
+  centrado no nominal ou puxando para um lado.
+- **Situação das cavidades por molde** — barras de conforme / não conforme /
+  não medida.
+- **Estatísticas por medida** — tabela com n, média, desvio padrão, mín., máx.,
+  **Cp**, **Cpk** e o percentual de conformes.
+
+> Os gráficos que comparam medidas diferentes usam o **desvio em relação ao
+> nominal**, não o valor absoluto: as medidas vão de ~154 mm a ~1834 mm, e
+> plotar as duas no mesmo eixo exigiria dois eixos — que inventam correlação.
+> Em desvio, todas dividem a mesma escala e a mesma tolerância.
+
+Cp e Cpk medem a capacidade do processo: abaixo de **1,00** a variação não cabe
+na tolerância; **1,33** é a referência usual de processo capaz.
 
 ### Conferência automática OK / NOK
 
@@ -64,13 +92,12 @@ powershell -ExecutionPolicy Bypass -File ferramentas/gerar-offline.ps1
 ## Onde os dados ficam
 
 Hoje: **apenas no navegador do inspetor** (`localStorage`). Nada é enviado a
-servidor nenhum. Para não perder o registro:
+servidor nenhum. A entrega final da inspeção é o **Exportar Excel** (`.xlsx`,
+3 abas: Cabeçalho, Medidas e Resumo por molde).
 
-- **Exportar Excel** — entrega final da inspeção (`.xlsx`, 3 abas).
-- **Salvar JSON** — backup do trabalho em andamento, que pode ser recarregado
-  depois com **Importar JSON** (útil para continuar em outro aparelho).
-
-⚠️ Limpar os dados de navegação do celular apaga a inspeção não exportada.
+⚠️ Limpar os dados de navegação do celular apaga a inspeção não exportada, e
+não há backup em outro lugar até a migração para o Supabase. Exporte o Excel
+ao terminar cada inspeção.
 
 ### Migração futura para o Supabase
 
@@ -90,7 +117,9 @@ js/campos.js            ⭐ Campos coletados — único arquivo a editar p/ muda
 js/avaliacao.js         Regras de tolerância e cálculo de OK / NOK
 js/armazenamento.js     Persistência (localStorage hoje, Supabase depois)
 js/exportar.js          Geração do .xlsx com formatação
+js/dashboard.js         Estatísticas e gráficos SVG do dashboard
 js/app.js               Telas, navegação e eventos
+ferramentas/            Gerador da versão offline em arquivo único
 docs/                   Planilha original que originou o formulário
 .github/workflows/      Publicação automática no GitHub Pages
 ```

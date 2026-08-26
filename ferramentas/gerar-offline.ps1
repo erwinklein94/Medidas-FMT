@@ -62,7 +62,9 @@ $html = TrocarBloco $html `
   ("<style>`n" + $css + "`n  </style>")
 
 # --- JS: biblioteca + aplicação, na mesma ordem do index.html ---
-$arquivos = @('js/campos.js','js/avaliacao.js','js/armazenamento.js','js/exportar.js','js/app.js')
+# mesma ordem do index.html — app.js precisa ser o último
+$arquivos = @('js/campos.js','js/avaliacao.js','js/armazenamento.js','js/exportar.js',
+              'js/dashboard.js','js/app.js')
 $js = ($arquivos | ForEach-Object { "/* ===== $_ ===== */`n" + (Ler $_) }) -join "`n"
 
 $html = TrocarBloco $html `
@@ -93,6 +95,7 @@ if ($c -notmatch 'CONFIG_INSPECAO')      { $problemas += 'campos.js nao foi embu
 if ($c -notmatch 'const Avaliacao')      { $problemas += 'avaliacao.js nao foi embutido' }
 if ($c -notmatch 'const Armazenamento')  { $problemas += 'armazenamento.js nao foi embutido' }
 if ($c -notmatch 'const Exportador')     { $problemas += 'exportar.js nao foi embutido' }
+if ($c -notmatch 'const Dashboard')      { $problemas += 'dashboard.js nao foi embutido' }
 if ($c -notmatch 'function iniciar')     { $problemas += 'app.js nao foi embutido' }
 if (([regex]::Matches($c, 'CONFIG_INSPECAO = \{')).Count -ne 1) { $problemas += 'codigo duplicado no arquivo' }
 
