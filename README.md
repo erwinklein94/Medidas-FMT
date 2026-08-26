@@ -39,6 +39,28 @@ arquivo Excel exportado.
 
 ---
 
+## Versão offline (arquivo único)
+
+`Medidas-FMT-offline.html` é o site inteiro num só arquivo — CSS, JavaScript,
+logos e a biblioteca de Excel embutidos. **Funciona sem internet nenhuma**, o
+que importa no trecho sem sinal, e serve de plano B quando o GitHub Pages está
+indisponível.
+
+Basta baixar e abrir com duplo clique, ou mandar por WhatsApp para o celular do
+inspetor. Não precisa instalar nada.
+
+Para regerar depois de mexer no código:
+
+```bash
+powershell -ExecutionPolicy Bypass -File ferramentas/gerar-offline.ps1
+```
+
+> O script monta tudo com operações literais de string, nunca com o operador
+> `-replace` do PowerShell: ele interpreta `$&` e `$1` na substituição, e código
+> JavaScript é cheio de cifrões — isso corrompe o arquivo em silêncio.
+
+---
+
 ## Onde os dados ficam
 
 Hoje: **apenas no navegador do inspetor** (`localStorage`). Nada é enviado a
