@@ -21,6 +21,7 @@ body {
   color: var(--texto);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 h1, h2, h3 { margin: 0; color: var(--texto-forte); line-height: 1.25; }
@@ -46,16 +47,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-/* Área de segurança do logo = altura da letra "O" (padding lateral). */
-.topo__logo {
-  height: 26px;
-  width: auto;
-  min-width: 78px;          /* respeita a redução máxima de 70px */
-  padding-right: 16px;
-  border-right: 1px solid rgba(255, 255, 255, 0.25);
-  flex-shrink: 0;
 }
 
 .topo__texto { flex: 1; min-width: 0; }
@@ -1090,6 +1081,123 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---------------------------------------------------------------
    RESPONSIVO
    --------------------------------------------------------------- */
+@media (max-width: 639px) {
+  body { font-size: 14px; }
+
+  /* No celular o status ocupa sua propria linha. Assim ele nao espreme o
+     titulo nem transforma o cabecalho em uma coluna alta de palavras. */
+  .topo__conteudo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "texto"
+      "estado";
+    align-items: center;
+    row-gap: 5px;
+    padding: 10px 12px 8px;
+  }
+
+  .topo__texto { grid-area: texto; }
+  .topo__estado { grid-area: estado; min-width: 0; }
+  .topo__titulo { font-size: 0.9rem; line-height: 1.2; }
+  .topo__sub { margin-top: 1px; font-size: 0.7rem; line-height: 1.25; }
+
+  .salvo {
+    max-width: 100%;
+    padding: 3px 8px;
+    gap: 5px;
+    font-size: 0.65rem;
+    line-height: 1.25;
+  }
+
+  .salvo > :last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .abas { padding: 0 12px; gap: 2px; }
+  .aba {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+    padding: 8px 8px 9px;
+    font-size: 0.76rem;
+  }
+
+  .pagina { padding: 12px 10px 36px; gap: 12px; }
+  .rodape { padding: 16px 12px 24px; font-size: 0.68rem; }
+  .cartao { border-radius: 12px; }
+  .cartao__cabecalho { gap: 10px; padding: 11px 12px; }
+  .cartao__icone { width: 34px; height: 34px; border-radius: 9px; }
+  .cartao__icone svg { width: 19px; height: 19px; }
+  .cartao__titulo { font-size: 0.88rem; }
+  .cartao__resumo { font-size: 0.72rem; line-height: 1.3; }
+  .cartao__corpo { padding: 2px 12px 14px; }
+
+  .grade-campos { gap: 10px; padding-top: 10px; }
+  .campo { gap: 4px; }
+  .campo__rotulo { font-size: 0.73rem; }
+  .campo__input,
+  .campo__select,
+  .campo__textarea {
+    min-height: 42px;
+    padding: 8px 10px;
+    border-radius: 9px;
+    font-size: 0.84rem;
+  }
+  .campo__textarea { min-height: 64px; }
+  .campo__caixa .campo__input { padding-right: 40px; }
+
+  .barra-acoes { gap: 10px; padding: 12px; border-radius: 12px; }
+  .barra-acoes__texto { margin-top: 6px; font-size: 0.72rem; }
+  .barra-acoes__botoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .btn { min-height: 42px; padding: 8px 11px; font-size: 0.77rem; }
+
+  .adicionar-molde { gap: 8px; padding: 12px 0 14px; margin-bottom: 14px; }
+  .adicionar-molde .campo { flex-basis: 100%; }
+  .adicionar-molde .btn { width: 100%; }
+  .grade-moldes { grid-template-columns: 1fr; gap: 10px; }
+  .molde { gap: 9px; padding: 13px; border-radius: 12px; }
+  .molde__nome { font-size: 1rem; }
+
+  .painel__caixa, .modal__caixa {
+    max-height: calc(100vh - env(safe-area-inset-top));
+    max-height: calc(100dvh - env(safe-area-inset-top));
+  }
+  .painel__topo, .modal__topo { padding: 9px 12px; gap: 8px; }
+  .painel__corpo { padding: 12px; }
+  .grade-cavidades { gap: 8px; }
+  .cavidade { gap: 6px; padding: 11px 10px; border-radius: 10px; }
+  .cavidade__numero { width: 34px; height: 34px; font-size: 0.95rem; }
+  .cavidade__rotulo { font-size: 0.76rem; }
+
+  .modal__corpo { padding: 7px; }
+  .modal__nota { padding: 4px 10px; }
+  .modal__rodape { padding: 7px 8px max(7px, env(safe-area-inset-bottom)); }
+  .modal__rodape,
+  .modal__rodape-direita { display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 6px; }
+  .modal__rodape > .btn { grid-column: 1 / -1; }
+  .modal__rodape-direita { margin-left: 0; }
+  .modal__rodape .btn { min-width: 0; padding: 6px 8px; font-size: 0.72rem; }
+  #formCavidade .secao__campos { padding: 7px 9px; gap: 6px; }
+  #formCavidade .conferencia { align-items: flex-start; }
+  #formCavidade .conferencia__motivo { overflow-wrap: anywhere; }
+
+  .indicadores { gap: 10px; }
+  .indicador { padding: 12px 14px; border-radius: 12px; }
+  .indicador__valor { font-size: 1.5rem; }
+  .indicador--heroi .indicador__valor { font-size: 2.2rem; }
+  .grafico { padding: 12px; }
+  .grafico__topo { gap: 7px; margin-bottom: 10px; }
+  .grafico__titulo { flex-basis: 100%; font-size: 0.86rem; }
+  .grafico__sub { font-size: 0.7rem; }
+  .grafico__filtro { width: 100%; align-items: flex-start; flex-direction: column; }
+  .grafico__filtro .campo__select { width: 100%; }
+  .grafico__area, .tabela-rolagem { max-width: 100%; -webkit-overflow-scrolling: touch; }
+  .tabela { font-size: 0.72rem; }
+  .tabela th, .tabela td { padding: 7px 8px; }
+}
+
 @media (min-width: 640px) {
   .grade-campos { grid-template-columns: repeat(2, 1fr); }
   .secao__campos { grid-template-columns: repeat(2, 1fr); }
@@ -1098,8 +1206,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   /* Mesa | Ombreira | Conferência lado a lado — cada bloco vira uma linha */
   #formCavidade .secao__campos { grid-template-columns: 1fr 1fr 1.15fr; }
   .topo__titulo { font-size: 1.2rem; }
-  .topo__logo { height: 30px; }
-
   .barra-acoes {
     flex-direction: row;
     align-items: center;

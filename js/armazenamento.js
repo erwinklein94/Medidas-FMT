@@ -1,10 +1,9 @@
 /* =====================================================================
    ARMAZENAMENTO — Medidas FMT
    ---------------------------------------------------------------------
-   Hoje: localStorage (os dados ficam apenas no navegador do inspetor).
-   Depois: para migrar ao Supabase basta reimplementar os métodos de
-   Armazenamento (carregar/salvar) chamando o client do Supabase — o
-   restante da aplicação não muda, pois só conversa com esta interface.
+   O localStorage e sempre gravado primeiro, inclusive sem internet.
+   O modulo Sincronizacao envia snapshots ao Supabase em segundo plano
+   sem bloquear este salvamento local.
    ===================================================================== */
 
 const Armazenamento = (function () {
@@ -54,6 +53,7 @@ const Armazenamento = (function () {
     base.cabecalho = (dados.cabecalho && typeof dados.cabecalho === 'object')
       ? dados.cabecalho : {};
     base.atualizadoEm = dados.atualizadoEm || null;
+    base.modoExemplo = dados.modoExemplo === true;
 
     base.moldes = Array.isArray(dados.moldes) ? dados.moldes
       .filter(function (m) { return m && typeof m === 'object'; })

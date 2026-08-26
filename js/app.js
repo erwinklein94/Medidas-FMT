@@ -10,6 +10,7 @@
      Estado
      --------------------------------------------------------------- */
   let estado = Armazenamento.carregar();
+  if (DadosExemplo.aplicar(estado)) Armazenamento.salvar(estado);
   let moldeAberto = null;      // id do molde no painel
   let cavidadeAberta = null;   // número da cavidade no modal
   let rascunho = {};           // dados da cavidade sendo editada
@@ -47,6 +48,7 @@
       texto.textContent = 'Sem salvamento local';
       return;
     }
+    Sincronizacao.agendar(estado);
     indicador.classList.add('is-gravando');
     texto.textContent = 'Salvando…';
     clearTimeout(timerSalvo);
@@ -667,6 +669,26 @@
     montarCabecalho();
     montarMoldes();
     ligarEventos();
+
+    Sincronizacao.iniciar(function () { return estado; }, function (sync) {
+      const indicador = $('#indicadorSalvo');
+      const texto = $('#salvoTexto');
+      if (!indicador || !texto) return;
+
+      if (sync.tipo === 'enviando') {
+        indicador.classList.add('is-gravando');
+        texto.textContent = 'Sincronizando com o banco…';
+      } else if (sync.tipo === 'sincronizado') {
+        indicador.classList.remove('is-gravando');
+        texto.textContent = 'Salvo e sincronizado';
+      } else if (sync.tipo === 'erro-local') {
+        indicador.classList.remove('is-gravando');
+        texto.textContent = 'Falha no salvamento local';
+      } else {
+        indicador.classList.remove('is-gravando');
+        texto.textContent = 'Salvo no navegador · aguardando internet';
+      }
+    });
 
     irPara(window.location.hash === '#dashboard' ? 'dashboard' : 'registros');
 

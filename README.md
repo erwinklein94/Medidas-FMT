@@ -18,7 +18,7 @@ onde a inspeção vira estatística.
 2. **Moldes** — adiciona cada molde inspecionado (ex.: `01`, `02`, `A-14`).
 3. **Cavidades** — ao clicar num molde, abrem as **6 cavidades** (6 dormentes).
 4. **Medidas** — ao clicar numa cavidade, abre o formulário com os campos da
-   planilha oficial. Tudo é salvo automaticamente no navegador.
+   planilha oficial. Tudo é salvo no navegador e sincronizado com o Supabase.
 5. **Exportar Excel** — gera o `.xlsx` com todas as cavidades preenchidas.
 
 ## Página de Dashboard
@@ -91,19 +91,16 @@ powershell -ExecutionPolicy Bypass -File ferramentas/gerar-offline.ps1
 
 ## Onde os dados ficam
 
-Hoje: **apenas no navegador do inspetor** (`localStorage`). Nada é enviado a
-servidor nenhum. A entrega final da inspeção é o **Exportar Excel** (`.xlsx`,
-3 abas: Cabeçalho, Medidas e Resumo por molde).
+Cada alteração é salva primeiro no navegador (`localStorage`). Em seguida, uma
+fila envia snapshots da inspeção ao projeto Supabase. Se o celular estiver sem
+internet, a fila permanece no navegador e volta a tentar automaticamente ao
+reconectar, ao reabrir a página e periodicamente enquanto a página estiver aberta.
 
-⚠️ Limpar os dados de navegação do celular apaga a inspeção não exportada, e
-não há backup em outro lugar até a migração para o Supabase. Exporte o Excel
-ao terminar cada inspeção.
+A entrega em **Exportar Excel** continua disponível (`.xlsx`, 3 abas:
+Cabeçalho, Medidas e Resumo por molde).
 
-### Migração futura para o Supabase
-
-Toda a persistência está isolada em [`js/armazenamento.js`](js/armazenamento.js).
-Para migrar, basta reimplementar `carregar()` e `salvar()` chamando o client do
-Supabase — o restante da aplicação não precisa mudar.
+⚠️ Não limpe os dados de navegação enquanto o indicador mostrar que ainda está
+aguardando internet. Isso também apagaria a fila que ainda não chegou ao banco.
 
 ---
 
@@ -115,7 +112,9 @@ css/rumo.css            Tokens da marca Rumo (cores, fonte, raio, sombra)
 css/app.css             Estilos da aplicação
 js/campos.js            ⭐ Campos coletados — único arquivo a editar p/ mudar o formulário
 js/avaliacao.js         Regras de tolerância e cálculo de OK / NOK
-js/armazenamento.js     Persistência (localStorage hoje, Supabase depois)
+js/armazenamento.js     Salvamento local imediato (localStorage)
+js/dados-exemplo.js     Base temporária de 20 moldes para o dashboard
+js/sincronizacao.js     Fila offline e envio automático ao Supabase
 js/exportar.js          Geração do .xlsx com formatação
 js/dashboard.js         Estatísticas e gráficos SVG do dashboard
 js/app.js               Telas, navegação e eventos

@@ -63,7 +63,7 @@ $html = TrocarBloco $html `
 
 # --- JS: biblioteca + aplicação, na mesma ordem do index.html ---
 # mesma ordem do index.html — app.js precisa ser o último
-$arquivos = @('js/campos.js','js/avaliacao.js','js/armazenamento.js','js/exportar.js',
+$arquivos = @('js/campos.js','js/avaliacao.js','js/armazenamento.js','js/dados-exemplo.js','js/sincronizacao.js','js/exportar.js',
               'js/dashboard.js','js/app.js')
 $js = ($arquivos | ForEach-Object { "/* ===== $_ ===== */`n" + (Ler $_) }) -join "`n"
 
@@ -78,8 +78,8 @@ $html = $html.Replace('assets/rumo/rumo-logo-azul.png',   (ComoDataUri 'assets/r
 
 # --- marca que esta versão é a offline ---
 $html = $html.Replace(
-  'Rumo — Qualidade de Via Permanente · Os dados ficam salvos apenas neste navegador.',
-  'Rumo — Qualidade de Via Permanente · Versão offline: funciona sem internet. Os dados ficam salvos apenas neste navegador.')
+  'Rumo — Qualidade de Via Permanente · Salvamento local com sincronização automática para o banco de dados.',
+  'Rumo — Qualidade de Via Permanente · Versão offline: salva no navegador e sincroniza com o banco quando houver internet.')
 
 [System.IO.File]::WriteAllText($saida, $html, (New-Object System.Text.UTF8Encoding($false)))
 
@@ -94,6 +94,8 @@ if ($c -match 'assets/rumo/')            { $problemas += 'sobrou caminho de imag
 if ($c -notmatch 'CONFIG_INSPECAO')      { $problemas += 'campos.js nao foi embutido' }
 if ($c -notmatch 'const Avaliacao')      { $problemas += 'avaliacao.js nao foi embutido' }
 if ($c -notmatch 'const Armazenamento')  { $problemas += 'armazenamento.js nao foi embutido' }
+if ($c -notmatch 'const DadosExemplo')   { $problemas += 'dados-exemplo.js nao foi embutido' }
+if ($c -notmatch 'const Sincronizacao')  { $problemas += 'sincronizacao.js nao foi embutido' }
 if ($c -notmatch 'const Exportador')     { $problemas += 'exportar.js nao foi embutido' }
 if ($c -notmatch 'const Dashboard')      { $problemas += 'dashboard.js nao foi embutido' }
 if ($c -notmatch 'function iniciar')     { $problemas += 'app.js nao foi embutido' }
