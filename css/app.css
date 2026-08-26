@@ -6,6 +6,11 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* O atributo [hidden] precisa vencer as regras de display das classes
+   (.modal e .painel usam display:flex e têm especificidade maior que a
+   regra [hidden] do navegador — sem isto os overlays nascem abertos). */
+[hidden] { display: none !important; }
+
 html { -webkit-text-size-adjust: 100%; }
 
 body {
