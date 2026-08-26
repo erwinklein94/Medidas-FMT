@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#003865">
+  <title>Entrar | Medidas FMT</title>
+  <link rel="stylesheet" href="css/rumo.css?v=5">
+  <link rel="stylesheet" href="css/app.css?v=7">
+</head>
+<body class="login-pagina">
+  <main class="login">
+    <section class="login__cartao">
+      <p class="login__kicker">Medidas FMT</p>
+      <h1 class="login__titulo">Acessar inspeções</h1>
+      <p class="login__texto">Entre com o perfil autorizado para registrar e acompanhar as medições.</p>
+      <form id="formLogin" class="login__form">
+        <label class="campo"><span class="campo__rotulo">E-mail</span><input class="campo__input" id="loginEmail" type="email" autocomplete="username" required></label>
+        <label class="campo"><span class="campo__rotulo">Senha</span><input class="campo__input" id="loginSenha" type="password" autocomplete="current-password" required></label>
+        <p class="login__aviso" id="loginAviso" role="alert" hidden></p>
+        <button class="btn btn--primario btn--bloco" id="btnEntrar" type="submit">Entrar</button>
+      </form>
+      <p class="login__offline">O primeiro acesso neste aparelho precisa de internet. Depois disso, os registros continuam disponíveis sem sinal e sincronizam automaticamente.</p>
+    </section>
+  </main>
+  <script src="js/autenticacao.js?v=1"></script>
+  <script src="js/login.js?v=1"></script>
+</body>
+</html>

@@ -531,13 +531,18 @@
      --------------------------------------------------------------- */
   function irPara(pagina) {
     const ehDashboard = pagina === 'dashboard';
+    const ehAuditoria = pagina === 'auditoria';
+    if (ehAuditoria && (!Autenticacao.perfil() || Autenticacao.perfil().perfil !== 'Editor')) pagina = 'registros';
 
     const registros = $('#paginaRegistros');
     const dashboard = $('#paginaDashboard');
-    registros.hidden = ehDashboard;
-    registros.style.display = ehDashboard ? 'none' : '';
-    dashboard.hidden = !ehDashboard;
-    dashboard.style.display = ehDashboard ? '' : 'none';
+    const auditoria = $('#paginaAuditoria');
+    registros.hidden = pagina !== 'registros';
+    registros.style.display = pagina === 'registros' ? '' : 'none';
+    dashboard.hidden = pagina !== 'dashboard';
+    dashboard.style.display = pagina === 'dashboard' ? '' : 'none';
+    auditoria.hidden = pagina !== 'auditoria';
+    auditoria.style.display = pagina === 'auditoria' ? '' : 'none';
 
     document.querySelectorAll('.aba').forEach(function (aba) {
       const ativa = aba.dataset.pagina === pagina;
@@ -549,6 +554,7 @@
     /* O dashboard é sempre recalculado ao abrir: os dados mudam na
        outra página e ele precisa refletir o estado atual. */
     if (ehDashboard) Dashboard.renderizar(estado);
+    if (pagina === 'auditoria') Auditoria.renderizar();
 
     if (window.location.hash !== '#' + pagina) {
       history.replaceState(null, '', '#' + pagina);
@@ -633,6 +639,10 @@
       aba.addEventListener('click', function () { irPara(this.dataset.pagina); });
     });
 
+    $('#btnSair').addEventListener('click', Autenticacao.sair);
+    $('#btnAtualizarAuditoria').addEventListener('click', Auditoria.renderizar);
+    Auditoria.iniciar(avisar);
+
     $('#btnLimpar').addEventListener('click', function () {
       if (!window.confirm(
         'Isso apaga o cabeçalho e TODOS os moldes salvos neste navegador. Continuar?'
@@ -648,7 +658,13 @@
   /* ---------------------------------------------------------------
      Início
      --------------------------------------------------------------- */
-  function iniciar() {
+  async function iniciar() {
+    const perfil = await Autenticacao.exigirSessao();
+    if (!perfil) return;
+    document.body.classList.remove('auth-pendente');
+    $('#usuarioPerfil').textContent = perfil.perfil;
+    $('#usuarioEmail').textContent = perfil.email;
+    if (perfil.perfil === 'Editor') $('#abaAuditoria').hidden = false;
     /* Overlays sempre começam fechados, aconteça o que acontecer com o CSS. */
     esconder($('#painelCavidades'));
     esconder($('#modalCavidade'));
@@ -690,7 +706,8 @@
       }
     });
 
-    irPara(window.location.hash === '#dashboard' ? 'dashboard' : 'registros');
+    const destino = window.location.hash.slice(1);
+    irPara(destino === 'dashboard' || destino === 'auditoria' ? destino : 'registros');
 
     if (!Armazenamento.disponivel()) {
       avisar('Este navegador bloqueou o armazenamento local — os dados não serão salvos.', 'erro');

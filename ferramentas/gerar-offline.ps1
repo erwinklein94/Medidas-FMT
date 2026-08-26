@@ -63,8 +63,8 @@ $html = TrocarBloco $html `
 
 # --- JS: biblioteca + aplicação, na mesma ordem do index.html ---
 # mesma ordem do index.html — app.js precisa ser o último
-$arquivos = @('js/campos.js','js/avaliacao.js','js/armazenamento.js','js/dados-exemplo.js','js/sincronizacao.js','js/exportar.js',
-              'js/dashboard.js','js/app.js')
+$arquivos = @('js/autenticacao.js','js/campos.js','js/avaliacao.js','js/armazenamento.js','js/dados-exemplo.js','js/sincronizacao.js','js/exportar.js',
+              'js/dashboard.js','js/auditoria.js','js/app.js')
 $js = ($arquivos | ForEach-Object { "/* ===== $_ ===== */`n" + (Ler $_) }) -join "`n"
 
 $html = TrocarBloco $html `

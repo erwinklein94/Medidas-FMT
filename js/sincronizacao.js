@@ -130,10 +130,13 @@ const Sincronizacao = (function () {
   }
 
   async function enviar(item) {
+    const token = await Autenticacao.tokenValido();
+    if (!token) throw new Error('Sessão aguardando conexão para ser renovada.');
     const resposta = await fetch(URL + '/rest/v1/inspecoes_fmt', {
       method: 'POST',
       headers: {
         'apikey': CHAVE_PUBLICA,
+        'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
