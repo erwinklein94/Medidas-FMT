@@ -49,11 +49,16 @@ $lib = Get-Content $libLocal -Raw -Encoding UTF8
 
 $html = Ler 'index.html'
 
+# Tira o ?v=N dos caminhos: no arquivo único nada é buscado por URL, e
+# assim as âncoras abaixo não quebram toda vez que a versão muda.
+# (substituição literal '' — nenhum cifrão envolvido, então é seguro)
+$html = $html -replace '\?v=\d+', ''
+
 # --- CSS ---
 $css = (Ler 'css/rumo.css') + "`n" + (Ler 'css/app.css')
 $html = TrocarBloco $html `
   '<link rel="stylesheet" href="css/rumo.css' `
-  '<link rel="stylesheet" href="css/app.css?v=2">' `
+  '<link rel="stylesheet" href="css/app.css">' `
   ("<style>`n" + $css + "`n  </style>")
 
 # --- JS: biblioteca + aplicação, na mesma ordem do index.html ---
@@ -62,7 +67,7 @@ $js = ($arquivos | ForEach-Object { "/* ===== $_ ===== */`n" + (Ler $_) }) -join
 
 $html = TrocarBloco $html `
   '<!-- xlsx-js-style' `
-  '<script src="js/app.js?v=2"></script>' `
+  '<script src="js/app.js"></script>' `
   ("<script>`n" + $lib + "`n</script>`n<script>`n" + $js + "`n</script>")
 
 # --- imagens como data URI ---
