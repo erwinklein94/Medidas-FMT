@@ -17,6 +17,13 @@
 
   const $ = function (sel) { return document.querySelector(sel); };
 
+  /* Mostrar/esconder overlays.
+     O estilo inline vence qualquer folha de estilo, inclusive uma versão
+     antiga em cache no celular do inspetor — sem isso, uma regra de
+     display mais específica que [hidden] deixa o modal aberto e travado. */
+  function mostrar(el) { el.hidden = false; el.style.display = 'flex'; }
+  function esconder(el) { el.hidden = true; el.style.display = 'none'; }
+
   /* ---------------------------------------------------------------
      Utilidades de tela
      --------------------------------------------------------------- */
@@ -370,7 +377,7 @@
     montarCavidades(molde);
 
     const painel = $('#painelCavidades');
-    painel.hidden = false;
+    mostrar(painel);
     document.body.style.overflow = 'hidden';
     painel.querySelector('[data-fechar-painel]').focus();
   }
@@ -416,7 +423,7 @@
   }
 
   function fecharPainel() {
-    $('#painelCavidades').hidden = true;
+    esconder($('#painelCavidades'));
     moldeAberto = null;
     document.body.style.overflow = '';
     if (elementoFoco) { elementoFoco.focus(); elementoFoco = null; }
@@ -474,7 +481,7 @@
     pintarConferencias(form, rascunho);
 
     const modal = $('#modalCavidade');
-    modal.hidden = false;
+    mostrar(modal);
     modal.querySelector('.modal__corpo').scrollTop = 0;
 
     const primeiro = form.querySelector('input, select, textarea');
@@ -509,7 +516,7 @@
   }
 
   function fecharModal() {
-    $('#modalCavidade').hidden = true;
+    esconder($('#modalCavidade'));
     cavidadeAberta = null;
     rascunho = {};
   }
@@ -646,6 +653,11 @@
      Início
      --------------------------------------------------------------- */
   function iniciar() {
+    /* Overlays sempre começam fechados, aconteça o que acontecer com o CSS. */
+    esconder($('#painelCavidades'));
+    esconder($('#modalCavidade'));
+    document.body.style.overflow = '';
+
     $('#tituloApp').textContent = CONFIG_INSPECAO.titulo;
     $('#subtituloApp').textContent = CONFIG_INSPECAO.subtitulo;
     document.title = CONFIG_INSPECAO.titulo + ' | Rumo';
