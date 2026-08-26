@@ -1,0 +1,63 @@
+/* =====================================================================
+   IDENTIDADE RUMO — Tokens de design (brand book oficial)
+   Referência: https://brandbook.rumolog.com/
+   Proporção da marca: azul escuro predominante, azuis/verdes como acento,
+   secundária apenas em toques pontuais.
+   ===================================================================== */
+
+:root {
+  /* ---- Paleta institucional (principal) ---- */
+  --rumo-azul:          #003865;  /* cor âncora */
+  --rumo-azul-claro:    #32A6E6;
+  --rumo-verde:         #1E9F7F;
+  --rumo-verde-claro:   #7FE06C;
+
+  /* Azuis escurecidos derivados */
+  --rumo-azul-profundo: #002B4D;
+  --rumo-azul-noite:    #001E36;
+
+  /* ---- Paleta secundária (uso PONTUAL) ---- */
+  --rumo-amarelo:       #FBD300;
+  --rumo-laranja:       #F78344;
+  --rumo-cinza:         #BDCCD4;
+
+  /* ---- Cinzas de interface ---- */
+  --rumo-cinza-50:      #F2F5F6;
+  --rumo-cinza-100:     #E5EBEE;
+  --rumo-cinza-200:     #D7E0E5;
+  --rumo-cinza-300:     #CAD6DD;
+  --rumo-texto:         #4D626F;
+  --rumo-texto-claro:   #6F838E;
+
+  /* ---- Tipografia ----
+     Cera Pro é paga e não pode ser redistribuída: declaramos na frente do
+     stack e caímos para Verdana, o fallback oficial do manual. */
+  --rumo-fonte: "Cera Pro", Verdana, Geneva, Tahoma, sans-serif;
+
+  /* ---- Estados ---- */
+  --rumo-ok:            var(--rumo-verde);
+  --rumo-alerta:        var(--rumo-amarelo);
+  --rumo-erro:          #D84545;
+
+  /* ---- Forma, sombra e movimento (chanfro do grafismo) ---- */
+  --rumo-raio:          14px;
+  --rumo-raio-sm:       10px;
+  --rumo-sombra:        0 4px 18px rgba(0, 56, 101, 0.08);
+  --rumo-sombra-hover:  0 10px 30px rgba(0, 56, 101, 0.16);
+  --rumo-transicao:     0.18s ease;
+}
+
+/* ---- Aliases usados pela aplicação ---- */
+:root {
+  --cor-primaria:   var(--rumo-azul);
+  --cor-acento:     var(--rumo-azul-claro);
+  --cor-sucesso:    var(--rumo-verde);
+  --cor-atencao:    var(--rumo-amarelo);
+  --cor-erro:       var(--rumo-erro);
+  --bg:             var(--rumo-cinza-50);
+  --superficie:     #FFFFFF;
+  --borda:          var(--rumo-cinza-200);
+  --texto:          var(--rumo-texto);
+  --texto-forte:    var(--rumo-azul);
+  --fonte:          var(--rumo-fonte);
+}
