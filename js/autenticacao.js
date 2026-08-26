@@ -27,6 +27,7 @@ const Autenticacao = (function () {
     if (!resposta.ok) {
       const erro = new Error((dados && (dados.msg || dados.message || dados.error_description)) || 'Falha na autenticação.');
       erro.status = resposta.status;
+      erro.codigo = dados && (dados.error_code || dados.code);
       throw erro;
     }
     return dados;
