@@ -51,6 +51,21 @@ const DadosExemplo = (function () {
     return dados;
   }
 
+  function preencherTodos(estado) {
+    let alterado = false;
+    (estado.moldes || []).forEach(function (molde, indiceMolde) {
+      molde.cavidades = molde.cavidades || {};
+      if (Object.keys(molde.cavidades).length) return;
+      for (let cavidade = 1; cavidade <= CONFIG_INSPECAO.cavidadesPorMolde; cavidade++) {
+        molde.cavidades[String(cavidade)] = criarCavidade(indiceMolde * CONFIG_INSPECAO.cavidadesPorMolde + cavidade);
+      }
+      molde.exemplo = true;
+      alterado = true;
+    });
+    if (alterado) estado.modoExemplo = true;
+    return alterado;
+  }
+
   function aplicar(estado) {
     if (!estado) return false;
     estado.cabecalhos = estado.cabecalhos || [];
@@ -63,7 +78,7 @@ const DadosExemplo = (function () {
     const exemplosAtuais = moldesAtuais.filter(function (molde) {
       return String(molde.id || '').indexOf('exemplo-molde-') === 0;
     });
-    if (exemplosAtuais.length === 20) return cabecalhosCriados;
+    if (exemplosAtuais.length === 20) return preencherTodos(estado) || cabecalhosCriados;
 
     /* Preserva qualquer coleta real que ja exista e recompõe apenas a base exemplo. */
     const moldesReais = moldesAtuais.filter(function (molde) {
@@ -97,11 +112,13 @@ const DadosExemplo = (function () {
         nome: 'EX-' + String(molde).padStart(2, '0'),
         criadoEm: new Date(agora.getTime() - (20 - molde) * 3600000).toISOString(),
         cavidades: cavidades,
-        grupoId: grupo.id
+        grupoId: grupo.id,
+        exemplo: true
       });
     }
+    preencherTodos(estado);
     return true;
   }
 
-  return { aplicar: aplicar };
+  return { aplicar: aplicar, preencherTodos: preencherTodos };
 })();

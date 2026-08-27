@@ -97,7 +97,7 @@ const Sincronizacao = (function () {
        deve poluir o banco. Se houver coletas reais junto dela, envia somente
        os moldes reais. */
     copia.moldes = (copia.moldes || []).filter(function (molde) {
-      return String(molde.id || '').indexOf('exemplo-molde-') !== 0;
+      return molde.exemplo !== true && String(molde.id || '').indexOf('exemplo-molde-') !== 0;
     });
     if (copia.modoExemplo && !copia.moldes.length) {
       notificar('sincronizado');

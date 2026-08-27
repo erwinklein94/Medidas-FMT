@@ -13,7 +13,7 @@ const Auditoria = (function () {
     const corpo = $('#corpoAuditoria');
     corpo.innerHTML = '<tr><td colspan="4">Carregando acessos…</td></tr>';
     try {
-      const resposta = await fetch(Autenticacao.URL + '/rest/v1/auditoria_acessos?select=email,perfil,acessado_em,recebido_em&order=acessado_em.desc&limit=200', { headers: await cabecalhos() });
+      const resposta = await fetch(Autenticacao.URL + '/rest/v1/auditoria_acessos?select=email,perfil,acessado_em,recebido_em&perfil=neq.Editor&order=acessado_em.desc&limit=200', { headers: await cabecalhos() });
       if (!resposta.ok) throw new Error('Não foi possível carregar a auditoria.');
       const acessos = await resposta.json();
       corpo.innerHTML = acessos.length ? acessos.map(function (item) {

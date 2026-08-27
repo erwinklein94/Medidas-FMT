@@ -250,6 +250,7 @@
       estado.moldes.push(molde);
       moldes.push(molde);
     }
+    if (estado.modoExemplo) DadosExemplo.preencherTodos(estado);
   }
 
   function criarCartaoMolde(molde) {
@@ -390,6 +391,7 @@
       grupoId: grupoId
     };
     estado.moldes.push(molde);
+    if (estado.modoExemplo) DadosExemplo.preencherTodos(estado);
     persistir();
     montarMoldes();
     avisar('Molde ' + nome + ' adicionado.', 'ok');

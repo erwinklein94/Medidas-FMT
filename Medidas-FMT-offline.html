@@ -2312,7 +2312,8 @@ const Armazenamento = (function () {
           nome: String(m.nome == null ? '' : m.nome).trim() || 'Sem identificação',
           criadoEm: m.criadoEm || new Date().toISOString(),
           cavidades: (m.cavidades && typeof m.cavidades === 'object') ? m.cavidades : {},
-          grupoId: m.grupoId ? String(m.grupoId) : ''
+          grupoId: m.grupoId ? String(m.grupoId) : '',
+          exemplo: m.exemplo === true || String(m.id || '').indexOf('exemplo-molde-') === 0
         };
       }) : [];
 
@@ -2427,6 +2428,21 @@ const DadosExemplo = (function () {
     return dados;
   }
 
+  function preencherTodos(estado) {
+    let alterado = false;
+    (estado.moldes || []).forEach(function (molde, indiceMolde) {
+      molde.cavidades = molde.cavidades || {};
+      if (Object.keys(molde.cavidades).length) return;
+      for (let cavidade = 1; cavidade <= CONFIG_INSPECAO.cavidadesPorMolde; cavidade++) {
+        molde.cavidades[String(cavidade)] = criarCavidade(indiceMolde * CONFIG_INSPECAO.cavidadesPorMolde + cavidade);
+      }
+      molde.exemplo = true;
+      alterado = true;
+    });
+    if (alterado) estado.modoExemplo = true;
+    return alterado;
+  }
+
   function aplicar(estado) {
     if (!estado) return false;
     estado.cabecalhos = estado.cabecalhos || [];
@@ -2439,7 +2455,7 @@ const DadosExemplo = (function () {
     const exemplosAtuais = moldesAtuais.filter(function (molde) {
       return String(molde.id || '').indexOf('exemplo-molde-') === 0;
     });
-    if (exemplosAtuais.length === 20) return cabecalhosCriados;
+    if (exemplosAtuais.length === 20) return preencherTodos(estado) || cabecalhosCriados;
 
     /* Preserva qualquer coleta real que ja exista e recompõe apenas a base exemplo. */
     const moldesReais = moldesAtuais.filter(function (molde) {
@@ -2473,13 +2489,15 @@ const DadosExemplo = (function () {
         nome: 'EX-' + String(molde).padStart(2, '0'),
         criadoEm: new Date(agora.getTime() - (20 - molde) * 3600000).toISOString(),
         cavidades: cavidades,
-        grupoId: grupo.id
+        grupoId: grupo.id,
+        exemplo: true
       });
     }
+    preencherTodos(estado);
     return true;
   }
 
-  return { aplicar: aplicar };
+  return { aplicar: aplicar, preencherTodos: preencherTodos };
 })();
 
 /* ===== js/sincronizacao.js ===== */
@@ -2582,7 +2600,7 @@ const Sincronizacao = (function () {
        deve poluir o banco. Se houver coletas reais junto dela, envia somente
        os moldes reais. */
     copia.moldes = (copia.moldes || []).filter(function (molde) {
-      return String(molde.id || '').indexOf('exemplo-molde-') !== 0;
+      return molde.exemplo !== true && String(molde.id || '').indexOf('exemplo-molde-') !== 0;
     });
     if (copia.modoExemplo && !copia.moldes.length) {
       notificar('sincronizado');
@@ -3883,7 +3901,7 @@ const Auditoria = (function () {
     const corpo = $('#corpoAuditoria');
     corpo.innerHTML = '<tr><td colspan="4">Carregando acessos…</td></tr>';
     try {
-      const resposta = await fetch(Autenticacao.URL + '/rest/v1/auditoria_acessos?select=email,perfil,acessado_em,recebido_em&order=acessado_em.desc&limit=200', { headers: await cabecalhos() });
+      const resposta = await fetch(Autenticacao.URL + '/rest/v1/auditoria_acessos?select=email,perfil,acessado_em,recebido_em&perfil=neq.Editor&order=acessado_em.desc&limit=200', { headers: await cabecalhos() });
       if (!resposta.ok) throw new Error('Não foi possível carregar a auditoria.');
       const acessos = await resposta.json();
       corpo.innerHTML = acessos.length ? acessos.map(function (item) {
@@ -4168,6 +4186,7 @@ const Auditoria = (function () {
       estado.moldes.push(molde);
       moldes.push(molde);
     }
+    if (estado.modoExemplo) DadosExemplo.preencherTodos(estado);
   }
 
   function criarCartaoMolde(molde) {
@@ -4308,6 +4327,7 @@ const Auditoria = (function () {
       grupoId: grupoId
     };
     estado.moldes.push(molde);
+    if (estado.modoExemplo) DadosExemplo.preencherTodos(estado);
     persistir();
     montarMoldes();
     avisar('Molde ' + nome + ' adicionado.', 'ok');

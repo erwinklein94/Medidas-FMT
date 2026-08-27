@@ -66,7 +66,8 @@ const Armazenamento = (function () {
           nome: String(m.nome == null ? '' : m.nome).trim() || 'Sem identificação',
           criadoEm: m.criadoEm || new Date().toISOString(),
           cavidades: (m.cavidades && typeof m.cavidades === 'object') ? m.cavidades : {},
-          grupoId: m.grupoId ? String(m.grupoId) : ''
+          grupoId: m.grupoId ? String(m.grupoId) : '',
+          exemplo: m.exemplo === true || String(m.id || '').indexOf('exemplo-molde-') === 0
         };
       }) : [];
 
