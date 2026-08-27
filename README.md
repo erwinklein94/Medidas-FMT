@@ -113,7 +113,6 @@ css/app.css             Estilos da aplicação
 js/campos.js            ⭐ Campos coletados — único arquivo a editar p/ mudar o formulário
 js/avaliacao.js         Regras de tolerância e cálculo de OK / NOK
 js/armazenamento.js     Salvamento local imediato (localStorage)
-js/dados-exemplo.js     Base temporária de 20 moldes para o dashboard
 js/sincronizacao.js     Fila offline e envio automático ao Supabase
 js/exportar.js          Geração do .xlsx com formatação
 js/dashboard.js         Estatísticas e gráficos SVG do dashboard

@@ -63,7 +63,7 @@ $html = TrocarBloco $html `
 
 # --- JS: biblioteca + aplicação, na mesma ordem do index.html ---
 # mesma ordem do index.html — app.js precisa ser o último
-$arquivos = @('js/autenticacao.js','js/campos.js','js/avaliacao.js','js/armazenamento.js','js/dados-exemplo.js','js/sincronizacao.js','js/exportar.js',
+$arquivos = @('js/autenticacao.js','js/campos.js','js/avaliacao.js','js/armazenamento.js','js/sincronizacao.js','js/exportar.js',
               'js/dashboard.js','js/auditoria.js','js/app.js')
 $js = ($arquivos | ForEach-Object { "/* ===== $_ ===== */`n" + (Ler $_) }) -join "`n"
 
@@ -94,7 +94,6 @@ if ($c -match 'assets/rumo/')            { $problemas += 'sobrou caminho de imag
 if ($c -notmatch 'CONFIG_INSPECAO')      { $problemas += 'campos.js nao foi embutido' }
 if ($c -notmatch 'const Avaliacao')      { $problemas += 'avaliacao.js nao foi embutido' }
 if ($c -notmatch 'const Armazenamento')  { $problemas += 'armazenamento.js nao foi embutido' }
-if ($c -notmatch 'const DadosExemplo')   { $problemas += 'dados-exemplo.js nao foi embutido' }
 if ($c -notmatch 'const Sincronizacao')  { $problemas += 'sincronizacao.js nao foi embutido' }
 if ($c -notmatch 'const Exportador')     { $problemas += 'exportar.js nao foi embutido' }
 if ($c -notmatch 'const Dashboard')      { $problemas += 'dashboard.js nao foi embutido' }

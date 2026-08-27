@@ -2254,7 +2254,7 @@ const Avaliacao = (function () {
 
 const Armazenamento = (function () {
   const CHAVE = 'medidas-fmt:inspecao';
-  const VERSAO = 2;
+  const VERSAO = 3;
 
   /* Estado padrão de uma inspeção vazia. */
   function estadoInicial() {
@@ -2302,18 +2302,19 @@ const Armazenamento = (function () {
         return { id: String(c.id || criarGrupoId()), dados: c.dados && typeof c.dados === 'object' ? c.dados : {} };
       }) : [];
     base.atualizadoEm = dados.atualizadoEm || null;
-    base.modoExemplo = dados.modoExemplo === true;
-
     base.moldes = Array.isArray(dados.moldes) ? dados.moldes
       .filter(function (m) { return m && typeof m === 'object'; })
+      /* Remove definitivamente qualquer massa demonstrativa antiga. */
+      .filter(function (m) {
+        return m.exemplo !== true && String(m.id || '').indexOf('exemplo-molde-') !== 0;
+      })
       .map(function (m) {
         return {
           id: String(m.id || criarId()),
           nome: String(m.nome == null ? '' : m.nome).trim() || 'Sem identificação',
           criadoEm: m.criadoEm || new Date().toISOString(),
           cavidades: (m.cavidades && typeof m.cavidades === 'object') ? m.cavidades : {},
-          grupoId: m.grupoId ? String(m.grupoId) : '',
-          exemplo: m.exemplo === true || String(m.id || '').indexOf('exemplo-molde-') === 0
+          grupoId: m.grupoId ? String(m.grupoId) : ''
         };
       }) : [];
 
@@ -2374,132 +2375,6 @@ const Armazenamento = (function () {
   };
 })();
 
-/* ===== js/dados-exemplo.js ===== */
-/* =====================================================================
-   DADOS TEMPORARIOS PARA VISUALIZACAO DO DASHBOARD
-   ---------------------------------------------------------------------
-   Cria 20 moldes completos somente quando o navegador ainda nao possui
-   moldes. Todos os registros recebem identificadores "exemplo-*" e o
-   estado fica marcado com modoExemplo para permitir remocao posterior.
-   ===================================================================== */
-
-const DadosExemplo = (function () {
-  'use strict';
-
-  function arredondar(valor) { return Number(valor.toFixed(2)); }
-
-  function variacao(indice, amplitude) {
-    /* Sequencia deterministica, evitando que os graficos mudem a cada carga. */
-    return (((indice * 37) % 17) - 8) / 8 * amplitude;
-  }
-
-  function criarCavidade(indice) {
-    let extMesa = 1834.12 + variacao(indice, 0.42);
-    let extOmbreira = 1834.67 + variacao(indice + 3, 0.42);
-    let aMesa = 154.50 + variacao(indice + 6, 0.42);
-    let aOmbreira = 155.55 + variacao(indice + 9, 0.42);
-    let bMesa = 154.50 + variacao(indice + 12, 0.42);
-    let bOmbreira = 155.55 + variacao(indice + 15, 0.42);
-
-    /* Alguns pontos fora da tolerancia deixam os graficos e KPIs informativos. */
-    if (indice % 19 === 0) extMesa = 1835.88;
-    if (indice % 23 === 0) aOmbreira = 154.82;
-    if (indice % 31 === 0) bMesa = 156.24;
-
-    const dados = {
-      ext_mesa: arredondar(extMesa),
-      ext_ombreira: arredondar(extOmbreira),
-      a_mesa: arredondar(aMesa),
-      a_ombreira: arredondar(aOmbreira),
-      b_mesa: arredondar(bMesa),
-      b_ombreira: arredondar(bOmbreira)
-    };
-
-    dados.ext_conf = Avaliacao.conferencia(CONFIG_INSPECAO.mapaCampos.ext_conf, dados).valor;
-    dados.a_conf = Avaliacao.conferencia(CONFIG_INSPECAO.mapaCampos.a_conf, dados).valor;
-    dados.b_conf = Avaliacao.conferencia(CONFIG_INSPECAO.mapaCampos.b_conf, dados).valor;
-
-    const nok = dados.ext_conf === 'NOK' || dados.a_conf === 'NOK' || dados.b_conf === 'NOK';
-    dados.situacao = nok ? 'Não conforme' : 'Conforme';
-    dados.acao = nok ? 'Reinspecionar' : 'Liberar';
-    dados.obsCavidade = nok
-      ? 'Exemplo temporário com medida fora da tolerância.'
-      : 'Exemplo temporário para visualização do dashboard.';
-    return dados;
-  }
-
-  function preencherTodos(estado) {
-    let alterado = false;
-    (estado.moldes || []).forEach(function (molde, indiceMolde) {
-      molde.cavidades = molde.cavidades || {};
-      if (Object.keys(molde.cavidades).length) return;
-      for (let cavidade = 1; cavidade <= CONFIG_INSPECAO.cavidadesPorMolde; cavidade++) {
-        molde.cavidades[String(cavidade)] = criarCavidade(indiceMolde * CONFIG_INSPECAO.cavidadesPorMolde + cavidade);
-      }
-      molde.exemplo = true;
-      alterado = true;
-    });
-    if (alterado) estado.modoExemplo = true;
-    return alterado;
-  }
-
-  function aplicar(estado) {
-    if (!estado) return false;
-    estado.cabecalhos = estado.cabecalhos || [];
-    let cabecalhosCriados = false;
-    while (estado.cabecalhos.length < 2) {
-      estado.cabecalhos.push({ id: Armazenamento.criarGrupoId(), dados: {} });
-      cabecalhosCriados = true;
-    }
-    const moldesAtuais = Array.isArray(estado.moldes) ? estado.moldes : [];
-    const exemplosAtuais = moldesAtuais.filter(function (molde) {
-      return String(molde.id || '').indexOf('exemplo-molde-') === 0;
-    });
-    if (exemplosAtuais.length === 20) return preencherTodos(estado) || cabecalhosCriados;
-
-    /* Preserva qualquer coleta real que ja exista e recompõe apenas a base exemplo. */
-    const moldesReais = moldesAtuais.filter(function (molde) {
-      return String(molde.id || '').indexOf('exemplo-molde-') !== 0;
-    });
-
-    const agora = new Date();
-    const data = agora.getFullYear() + '-' +
-      String(agora.getMonth() + 1).padStart(2, '0') + '-' +
-      String(agora.getDate()).padStart(2, '0');
-
-    estado.modoExemplo = true;
-    let grupo = estado.cabecalhos[0];
-    if (!grupo) {
-      grupo = { id: Armazenamento.criarGrupoId(), dados: {} };
-      estado.cabecalhos.push(grupo);
-    }
-    if (!moldesReais.length) grupo.dados = Object.assign({
-      data: data, local: 'Base demonstrativa', pista: 'Pista exemplo', lote: 'Lote exemplo', responsavel: 'Dados de exemplo'
-    }, grupo.dados);
-
-    estado.moldes = moldesReais;
-    for (let molde = 1; molde <= 20; molde++) {
-      const cavidades = {};
-      for (let cavidade = 1; cavidade <= CONFIG_INSPECAO.cavidadesPorMolde; cavidade++) {
-        const indice = (molde - 1) * CONFIG_INSPECAO.cavidadesPorMolde + cavidade;
-        cavidades[String(cavidade)] = criarCavidade(indice);
-      }
-      estado.moldes.push({
-        id: 'exemplo-molde-' + String(molde).padStart(2, '0'),
-        nome: 'EX-' + String(molde).padStart(2, '0'),
-        criadoEm: new Date(agora.getTime() - (20 - molde) * 3600000).toISOString(),
-        cavidades: cavidades,
-        grupoId: grupo.id,
-        exemplo: true
-      });
-    }
-    preencherTodos(estado);
-    return true;
-  }
-
-  return { aplicar: aplicar, preencherTodos: preencherTodos };
-})();
-
 /* ===== js/sincronizacao.js ===== */
 /* =====================================================================
    SINCRONIZACAO SUPABASE — fila offline-first
@@ -2553,9 +2428,19 @@ const Sincronizacao = (function () {
   function lerFila() {
     try {
       const dados = JSON.parse(window.localStorage.getItem(CHAVE_FILA) || '[]');
-      return Array.isArray(dados) ? dados.filter(function (item) {
-        return item && item.id && item.dados;
-      }) : [];
+      return Array.isArray(dados) ? dados.map(function (item) {
+        if (!item || !item.id || !item.dados) return null;
+        const copia = item;
+        copia.dados.moldes = (copia.dados.moldes || []).filter(function (molde) {
+          return molde.exemplo !== true && String(molde.id || '').indexOf('exemplo-molde-') !== 0;
+        }).map(function (molde) {
+          const limpo = Object.assign({}, molde);
+          delete limpo.exemplo;
+          return limpo;
+        });
+        delete copia.dados.modoExemplo;
+        return copia.dados.moldes.length ? copia : null;
+      }).filter(Boolean) : [];
     } catch (e) {
       return [];
     }
@@ -2595,18 +2480,6 @@ const Sincronizacao = (function () {
     let copia;
     try { copia = JSON.parse(JSON.stringify(estado)); }
     catch (e) { return false; }
-
-    /* A base demonstrativa existe apenas para visualizar o Dashboard e nao
-       deve poluir o banco. Se houver coletas reais junto dela, envia somente
-       os moldes reais. */
-    copia.moldes = (copia.moldes || []).filter(function (molde) {
-      return molde.exemplo !== true && String(molde.id || '').indexOf('exemplo-molde-') !== 0;
-    });
-    if (copia.modoExemplo && !copia.moldes.length) {
-      notificar('sincronizado');
-      return false;
-    }
-    delete copia.modoExemplo;
 
     fila.push({
       id: id('sync-'),
@@ -3946,7 +3819,6 @@ const Auditoria = (function () {
      Estado
      --------------------------------------------------------------- */
   let estado = Armazenamento.carregar();
-  if (DadosExemplo.aplicar(estado)) Armazenamento.salvar(estado);
   let moldeAberto = null;      // id do molde no painel
   let cavidadeAberta = null;   // número da cavidade no modal
   let rascunho = {};           // dados da cavidade sendo editada
@@ -4186,7 +4058,6 @@ const Auditoria = (function () {
       estado.moldes.push(molde);
       moldes.push(molde);
     }
-    if (estado.modoExemplo) DadosExemplo.preencherTodos(estado);
   }
 
   function criarCartaoMolde(molde) {
@@ -4327,7 +4198,6 @@ const Auditoria = (function () {
       grupoId: grupoId
     };
     estado.moldes.push(molde);
-    if (estado.modoExemplo) DadosExemplo.preencherTodos(estado);
     persistir();
     montarMoldes();
     avisar('Molde ' + nome + ' adicionado.', 'ok');
@@ -4616,9 +4486,11 @@ const Auditoria = (function () {
       )) return;
       Armazenamento.limpar();
       estado = Armazenamento.estadoInicial();
-      const grupo = novoCabecalho();
-      estado.cabecalhos.push(grupo);
-      preencherAte50(grupo.id);
+      while (estado.cabecalhos.length < 2) {
+        const grupo = novoCabecalho();
+        estado.cabecalhos.push(grupo);
+        preencherAte50(grupo.id);
+      }
       montarMoldes();
       avisar('Inspeção limpa.');
     });
@@ -4643,7 +4515,7 @@ const Auditoria = (function () {
     $('#subtituloApp').textContent = CONFIG_INSPECAO.subtitulo;
     document.title = CONFIG_INSPECAO.titulo + ' | Rumo';
 
-    if (!estado.cabecalhos.length) estado.cabecalhos.push(novoCabecalho());
+    while (estado.cabecalhos.length < 2) estado.cabecalhos.push(novoCabecalho());
     estado.cabecalhos.forEach(function (grupo) {
       if (!grupo.dados.data) grupo.dados.data = dataHoje();
       preencherAte50(grupo.id);

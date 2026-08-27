@@ -50,9 +50,19 @@ const Sincronizacao = (function () {
   function lerFila() {
     try {
       const dados = JSON.parse(window.localStorage.getItem(CHAVE_FILA) || '[]');
-      return Array.isArray(dados) ? dados.filter(function (item) {
-        return item && item.id && item.dados;
-      }) : [];
+      return Array.isArray(dados) ? dados.map(function (item) {
+        if (!item || !item.id || !item.dados) return null;
+        const copia = item;
+        copia.dados.moldes = (copia.dados.moldes || []).filter(function (molde) {
+          return molde.exemplo !== true && String(molde.id || '').indexOf('exemplo-molde-') !== 0;
+        }).map(function (molde) {
+          const limpo = Object.assign({}, molde);
+          delete limpo.exemplo;
+          return limpo;
+        });
+        delete copia.dados.modoExemplo;
+        return copia.dados.moldes.length ? copia : null;
+      }).filter(Boolean) : [];
     } catch (e) {
       return [];
     }
@@ -92,18 +102,6 @@ const Sincronizacao = (function () {
     let copia;
     try { copia = JSON.parse(JSON.stringify(estado)); }
     catch (e) { return false; }
-
-    /* A base demonstrativa existe apenas para visualizar o Dashboard e nao
-       deve poluir o banco. Se houver coletas reais junto dela, envia somente
-       os moldes reais. */
-    copia.moldes = (copia.moldes || []).filter(function (molde) {
-      return molde.exemplo !== true && String(molde.id || '').indexOf('exemplo-molde-') !== 0;
-    });
-    if (copia.modoExemplo && !copia.moldes.length) {
-      notificar('sincronizado');
-      return false;
-    }
-    delete copia.modoExemplo;
 
     fila.push({
       id: id('sync-'),

@@ -10,7 +10,6 @@
      Estado
      --------------------------------------------------------------- */
   let estado = Armazenamento.carregar();
-  if (DadosExemplo.aplicar(estado)) Armazenamento.salvar(estado);
   let moldeAberto = null;      // id do molde no painel
   let cavidadeAberta = null;   // número da cavidade no modal
   let rascunho = {};           // dados da cavidade sendo editada
@@ -250,7 +249,6 @@
       estado.moldes.push(molde);
       moldes.push(molde);
     }
-    if (estado.modoExemplo) DadosExemplo.preencherTodos(estado);
   }
 
   function criarCartaoMolde(molde) {
@@ -391,7 +389,6 @@
       grupoId: grupoId
     };
     estado.moldes.push(molde);
-    if (estado.modoExemplo) DadosExemplo.preencherTodos(estado);
     persistir();
     montarMoldes();
     avisar('Molde ' + nome + ' adicionado.', 'ok');
@@ -680,9 +677,11 @@
       )) return;
       Armazenamento.limpar();
       estado = Armazenamento.estadoInicial();
-      const grupo = novoCabecalho();
-      estado.cabecalhos.push(grupo);
-      preencherAte50(grupo.id);
+      while (estado.cabecalhos.length < 2) {
+        const grupo = novoCabecalho();
+        estado.cabecalhos.push(grupo);
+        preencherAte50(grupo.id);
+      }
       montarMoldes();
       avisar('Inspeção limpa.');
     });
@@ -707,7 +706,7 @@
     $('#subtituloApp').textContent = CONFIG_INSPECAO.subtitulo;
     document.title = CONFIG_INSPECAO.titulo + ' | Rumo';
 
-    if (!estado.cabecalhos.length) estado.cabecalhos.push(novoCabecalho());
+    while (estado.cabecalhos.length < 2) estado.cabecalhos.push(novoCabecalho());
     estado.cabecalhos.forEach(function (grupo) {
       if (!grupo.dados.data) grupo.dados.data = dataHoje();
       preencherAte50(grupo.id);

@@ -8,7 +8,7 @@
 
 const Armazenamento = (function () {
   const CHAVE = 'medidas-fmt:inspecao';
-  const VERSAO = 2;
+  const VERSAO = 3;
 
   /* Estado padrão de uma inspeção vazia. */
   function estadoInicial() {
@@ -56,18 +56,19 @@ const Armazenamento = (function () {
         return { id: String(c.id || criarGrupoId()), dados: c.dados && typeof c.dados === 'object' ? c.dados : {} };
       }) : [];
     base.atualizadoEm = dados.atualizadoEm || null;
-    base.modoExemplo = dados.modoExemplo === true;
-
     base.moldes = Array.isArray(dados.moldes) ? dados.moldes
       .filter(function (m) { return m && typeof m === 'object'; })
+      /* Remove definitivamente qualquer massa demonstrativa antiga. */
+      .filter(function (m) {
+        return m.exemplo !== true && String(m.id || '').indexOf('exemplo-molde-') !== 0;
+      })
       .map(function (m) {
         return {
           id: String(m.id || criarId()),
           nome: String(m.nome == null ? '' : m.nome).trim() || 'Sem identificação',
           criadoEm: m.criadoEm || new Date().toISOString(),
           cavidades: (m.cavidades && typeof m.cavidades === 'object') ? m.cavidades : {},
-          grupoId: m.grupoId ? String(m.grupoId) : '',
-          exemplo: m.exemplo === true || String(m.id || '').indexOf('exemplo-molde-') === 0
+          grupoId: m.grupoId ? String(m.grupoId) : ''
         };
       }) : [];
 
