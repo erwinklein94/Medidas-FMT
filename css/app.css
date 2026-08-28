@@ -11,6 +11,18 @@
    regra [hidden] do navegador — sem isto os overlays nascem abertos). */
 [hidden] { display: none !important; }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 html { -webkit-text-size-adjust: 100%; }
 
 body {
@@ -131,10 +143,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .rodape p { margin: 0; }
 
 .grupos-inspecao { display: grid; gap: 18px; }
-.grupo-inspecao__titulo { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; background: var(--rumo-azul); color: #fff; }
-.grupo-inspecao__titulo > div { display: grid; gap: 2px; }
-.grupo-inspecao__titulo strong { color: #fff; font-size: 1rem; }
-.grupo-inspecao__numero { color: var(--rumo-cinza); font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.grupo-inspecao__titulo { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--rumo-azul); color: #fff; }
+.grupo-inspecao__alternar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; padding: 6px 4px; border: 0; background: transparent; color: #fff; text-align: left; cursor: pointer; }
+.grupo-inspecao__alternar:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 6px; }
+.grupo-inspecao__seta { flex: 0 0 auto; font-size: 1.25rem; line-height: 1; transform: rotate(180deg); transition: transform var(--rumo-transicao); }
+.grupo-inspecao.is-recolhido .grupo-inspecao__seta { transform: rotate(0); }
+.grupo-inspecao__resumo { min-width: 0; font-size: .78rem; font-weight: 700; line-height: 1.35; }
+.grupo-inspecao.is-recolhido { box-shadow: var(--rumo-sombra); }
+.grupo-inspecao.is-recolhido .grupo-inspecao__titulo { border-radius: calc(var(--rumo-raio) - 1px); }
 .grupo-cabecalho { padding: 14px 0 18px; border-bottom: 1px solid var(--borda); }
 .grupo-inspecao__moldes { padding-top: 16px; }
 .grupo-inspecao__moldes-topo > div { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }

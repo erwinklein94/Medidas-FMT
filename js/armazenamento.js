@@ -8,7 +8,7 @@
 
 const Armazenamento = (function () {
   const CHAVE = 'medidas-fmt:inspecao';
-  const VERSAO = 3;
+  const VERSAO = 4;
 
   /* Estado padrão de uma inspeção vazia. */
   function estadoInicial() {
@@ -71,6 +71,28 @@ const Armazenamento = (function () {
           grupoId: m.grupoId ? String(m.grupoId) : ''
         };
       }) : [];
+
+    /* A versao 3 criava automaticamente 50 moldes (01 a 50) em cada
+       cabecalho. Na primeira abertura da versao 4, remove somente os
+       moldes vazios de grupos que tenham essa assinatura exata. Moldes
+       com qualquer dado de cavidade sao sempre preservados. */
+    if (Number(dados.versao || 0) < 4) {
+      base.cabecalhos.forEach(function (cabecalho) {
+        const doGrupo = base.moldes.filter(function (m) { return m.grupoId === cabecalho.id; });
+        const nomes = doGrupo.map(function (m) { return m.nome; }).sort();
+        const automaticos = Array.from({ length: 50 }, function (_, i) {
+          return String(i + 1).padStart(2, '0');
+        });
+        const assinaturaAutomatica = nomes.length === 50 && nomes.every(function (nome, i) {
+          return nome === automaticos[i];
+        });
+        if (assinaturaAutomatica) {
+          base.moldes = base.moldes.filter(function (m) {
+            return m.grupoId !== cabecalho.id || Object.keys(m.cavidades || {}).length > 0;
+          });
+        }
+      });
+    }
 
     /* Migra automaticamente o formato antigo. Se havia mais de 50 moldes,
        cria blocos consecutivos e replica os dados gerais em cada um. */
